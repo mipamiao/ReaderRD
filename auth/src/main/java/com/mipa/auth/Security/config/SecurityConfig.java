@@ -20,6 +20,7 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    //todo 使用https
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.csrf(csrf -> csrf.disable())
