@@ -8,10 +8,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
 
-@Component
 public class UserEntityConvert {
 
-    public UserEntity fromUserRegisterDTO(UserRegisterDTO userRegisterDTO){
+    public static UserEntity fromUserRegisterDTO(UserRegisterDTO userRegisterDTO){
         UserEntity userEntity = new UserEntity();
         userEntity.setUserName(userRegisterDTO.getUserName());
         userEntity.setPassword(userRegisterDTO.getPassword());
@@ -21,7 +20,7 @@ public class UserEntityConvert {
         return userEntity;
     }
 
-    public UserInfoDTO toUserInfoDTO(UserEntity userEntity) {
+    public static UserInfoDTO toUserInfoDTO(UserEntity userEntity) {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
         userInfoDTO.setUserId(userEntity.getUserId());
         userInfoDTO.setUserName(userEntity.getUserName());
@@ -29,5 +28,11 @@ public class UserEntityConvert {
         userInfoDTO.setRole(userEntity.getRole());
         userInfoDTO.setCreatedAt(userEntity.getCreatedAt());
         return userInfoDTO;
+    }
+
+    public static UserEntity specifyUserId(String userId){
+        UserEntity userEntity = new UserEntity();
+        userEntity.setUserId(userId);
+        return userEntity;
     }
 }

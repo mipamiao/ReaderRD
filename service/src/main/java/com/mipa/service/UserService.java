@@ -17,15 +17,13 @@ public class UserService implements IUserService {
     @Autowired
     private UserRepository userRepo;
 
-    @Autowired
-    private UserEntityConvert userEntityConvert;
 
     @Autowired
     PasswordEncoder passwordEncoder;
 
     @Override
     public boolean save(UserRegisterDTO userRegisterDTO){
-        var entity = userEntityConvert.fromUserRegisterDTO(userRegisterDTO);
+        var entity = UserEntityConvert.fromUserRegisterDTO(userRegisterDTO);
 
         if(userRepo.findByUserName(entity.getUserName()).isEmpty()){
             entity.setPassword(passwordEncoder.encode(entity.getPassword()));
@@ -38,6 +36,6 @@ public class UserService implements IUserService {
     @Override
     public Optional<UserInfoDTO> load(String userId){
         var entity = userRepo.findById(userId);
-        return entity.map(userEntity -> userEntityConvert.toUserInfoDTO(userEntity));
+        return entity.map(UserEntityConvert::toUserInfoDTO);
     }
 }

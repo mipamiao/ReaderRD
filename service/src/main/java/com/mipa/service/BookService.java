@@ -3,7 +3,9 @@ package com.mipa.service;
 import com.mipa.common.bookdto.BookDTO;
 import com.mipa.common.bookdto.BookRequestDTO;
 import com.mipa.convert.BookEntityConvert;
+import com.mipa.convert.UserEntityConvert;
 import com.mipa.model.BookEntity;
+import com.mipa.model.UserEntity;
 import com.mipa.repository.BookRepository;
 import com.mipa.repository.UserRepository;
 import com.mipa.service.api.IBookService;
@@ -91,5 +93,11 @@ public class BookService extends IBookService {
             }
         }
         return false;
+    }
+
+    public Page<BookDTO> getBooksByUserId(String userId, int pageNumber, int pageSize) {
+        Pageable pageable = PageRequest.of(pageNumber, pageSize);
+        UserEntity user = UserEntityConvert.specifyUserId(userId);
+        return bookRepo.findByAuthorId(user, pageable).map(BookEntityConvert::toBookDTO);
     }
 }
