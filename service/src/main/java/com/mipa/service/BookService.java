@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
-public class BookService extends IBookService {
+public class BookService implements IBookService {
 
 
     @Autowired
