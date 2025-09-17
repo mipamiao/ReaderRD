@@ -24,14 +24,14 @@ public interface BookRepository extends CrudRepository<BookEntity, String> {
 
 
     @Modifying
-    @Query("UPDATE BookEntity b SET b.chaptersCount = :chaptersCount, b.updatedAt = : WHERE b.bookId = :bookId")
+    @Query("UPDATE BookEntity b SET b.chaptersCount = :chaptersCount, b.updatedAt = :updatedAt WHERE b.bookId = :bookId")
     Integer updateChapterCount(
             @Param("bookId") String bookId,
             @Param("chaptersCount") Integer chaptersCount,
             @Param("updatedAt") LocalDateTime updatedAt);
 
     @Modifying
-    @Query("UPDATE BookEntity b SET b.updatedAt = : WHERE b.bookId = :bookId")
+    @Query("UPDATE BookEntity b SET b.updatedAt = :updatedAt WHERE b.bookId = :bookId")
     Integer updatedAt(
             @Param("bookId") String bookId,
             @Param("updatedAt") LocalDateTime updatedAt);
