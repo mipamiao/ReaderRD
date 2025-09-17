@@ -43,4 +43,10 @@ public class BookEntityConvert {
         bookEntity.setUpdatedAt(LocalDateTime.now());
         return bookEntity;
     }
+    
+    public static BookEntity specifyBookId(String bookId){
+        BookEntity bookEntity = new BookEntity();
+        bookEntity.setBookId(bookId);
+        return bookEntity;
+    }
 }
