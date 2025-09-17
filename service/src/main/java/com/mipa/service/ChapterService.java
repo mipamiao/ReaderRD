@@ -17,9 +17,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+//todo save到update的转变
 @Service
 public class ChapterService implements IChapterService {
 
@@ -32,6 +33,7 @@ public class ChapterService implements IChapterService {
     @Autowired
     private BookRepository bookRepo;
 
+    @Transactional
     public ChapterInfoDTO addChapter(ChapterRequestDTO dto) {
         var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), null);
         if (resultData.result) {
@@ -39,6 +41,7 @@ public class ChapterService implements IChapterService {
             chapterEntity.setCreatedAt(LocalDateTime.now());
             chapterEntity.setUpdatedAt(LocalDateTime.now());
             chapterEntity.setBook(resultData.book);
+            bookRepo.updateChapterCount(resultData.book.getBookId(), resultData.book.getChaptersCount() + 1, LocalDateTime.now());
             var result = chapterRepo.save(chapterEntity);
             return ChapterEntityConvert.toChapterInfoDTO(result);
         }
@@ -54,16 +57,19 @@ public class ChapterService implements IChapterService {
             chapter.setOrder(dto.getOrder());
             chapter.setUpdatedAt(LocalDateTime.now());
             chapterRepo.save(chapter);
+            bookRepo.updatedAt(resultData.book.getBookId(), LocalDateTime.now());
             return true;
         }
         return false;
     }
 
+    @Transactional
     public Boolean deleteChapter(String authorId, String bookId, String chapterId) {
         var resultData = checkBookIdAndAuthorId(bookId, authorId, chapterId);
         if (resultData.result) {
             var chapter = resultData.chapter;
-            if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
+            if (Objects.equals(chapter.getBook().getBookId(), bookId) && resultData.book.getChaptersCount() > 0) {
+                bookRepo.updateChapterCount(resultData.book.getBookId(), resultData.book.getChaptersCount() - 1, LocalDateTime.now());
                 chapterRepo.delete(chapter);
                 return true;
             }

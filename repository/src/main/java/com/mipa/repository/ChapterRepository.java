@@ -10,6 +10,6 @@ import java.util.List;
 
 public interface ChapterRepository extends CrudRepository<ChapterEntity, String> {
 
-    @Query("SELECT c FROM ChapterEntity c WHERE c.book = :book ORDER BY c.order ASC")
+    @Query("SELECT c FROM ChapterEntity c WHERE c.book = :book ORDER BY c.order DESC")
     List<ChapterEntity> findByBookIdOrderByOrderAsc(@Param("book")BookEntity book);
 }
