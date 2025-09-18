@@ -25,6 +25,7 @@ public class ChapterEntity {
     private String title;
 
     @Lob
+    @Basic(fetch = FetchType.LAZY)
     @Column(nullable = false, columnDefinition = "LONGTEXT")
     private String content;
 
