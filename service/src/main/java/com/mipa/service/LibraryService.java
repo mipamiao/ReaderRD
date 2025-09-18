@@ -3,8 +3,12 @@ package com.mipa.service;
 import com.mipa.common.librarydto.LibraryDTO;
 import com.mipa.common.librarydto.LibraryRequestDTO;
 import com.mipa.convert.LibraryEntityConvert;
+import com.mipa.model.BookEntity;
+import com.mipa.model.ChapterEntity;
 import com.mipa.model.LibraryEntity;
+import com.mipa.model.UserEntity;
 import com.mipa.repository.BookRepository;
+import com.mipa.repository.ChapterRepository;
 import com.mipa.repository.LibraryRepository;
 import com.mipa.repository.UserRepository;
 import com.mipa.service.api.ILibraryService;
@@ -16,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 //todo 自检下是否有很多不必要的更改（也就是本来只是更新单项，但是更新了一整行）
 @Service
@@ -30,6 +35,9 @@ public class LibraryService implements ILibraryService {
     @Autowired
     BookRepository bookRepo;
 
+    @Autowired
+    ChapterRepository chapterRepo;
+
     public boolean addToLibrary(String userId, String bookId) {
         var userOpt = userRepo.findById(userId);
         if(userOpt.isPresent()){
@@ -37,14 +45,7 @@ public class LibraryService implements ILibraryService {
             if(bookOpt.isPresent()){
                 var libraryOpt = libraryRepo.findByUserIdAndBookId(userOpt.get(), bookOpt.get());
                 if(libraryOpt.isEmpty()){
-                    var libraryEntity = new LibraryEntity();
-                    libraryEntity.setUser(userOpt.get());
-                    libraryEntity.setBook(bookOpt.get());
-                    libraryEntity.setAddedAt(LocalDateTime.now());
-//                libraryEntity.setLastReadAt(LocalDateTime.now());//这里如果只是添加到书架但未阅读，默认最后阅读时间为当前时间
-//                libraryEntity.setLastReadChapter();这两项为null
-                    libraryRepo.save(libraryEntity);
-                    return true;
+                    return addToLibrary(userOpt.get(), bookOpt.get());
                 }
             }
         }
@@ -85,10 +86,24 @@ public class LibraryService implements ILibraryService {
         if (userOpt.isPresent()) {
             var bookOpt = bookRepo.findById(bookId);
             if (bookOpt.isPresent()) {
+                var chapterOpt = chapterRepo.findById(dto.getLastReadChapterId());
+                ChapterEntity chapter;
+                if (chapterOpt.isPresent() && chapterOpt.get().getBook().getBookId().equals(bookId))
+                    chapter = chapterOpt.get();
+                else chapter = chapterRepo.findFirstChapterByBook(bookOpt.get());
                 var libraryOpt = libraryRepo.findByUserIdAndBookId(userOpt.get(), bookOpt.get());
                 if (libraryOpt.isPresent()) {
                     var libraryEntity = libraryOpt.get();
-                    libraryEntity.setLastReadChapter(dto.getLastReadChapter());
+                    libraryEntity.setChapter(chapter);
+                    libraryEntity.setLastReadAt(LocalDateTime.now());
+                    libraryRepo.save(libraryEntity);
+                    return true;
+                }else{
+                    var libraryEntity = new LibraryEntity();
+                    libraryEntity.setUser(userOpt.get());
+                    libraryEntity.setBook(bookOpt.get());
+                    libraryEntity.setChapter(chapter);
+                    libraryEntity.setAddedAt(LocalDateTime.now());
                     libraryEntity.setLastReadAt(LocalDateTime.now());
                     libraryRepo.save(libraryEntity);
                     return true;
@@ -106,5 +121,17 @@ public class LibraryService implements ILibraryService {
             return page.map(libraryEntity -> LibraryEntityConvert.toLibraryDTO(libraryEntity, libraryEntity.getBook(), userId));
         }
         return null;
+    }
+
+    private Boolean addToLibrary(UserEntity user, BookEntity book){
+        var libraryEntity = new LibraryEntity();
+        libraryEntity.setUser(user);
+        libraryEntity.setBook(book);
+        libraryEntity.setAddedAt(LocalDateTime.now());
+        //libraryEntity.setChapter(null);
+//                libraryEntity.setLastReadAt(LocalDateTime.now());//这里如果只是添加到书架但未阅读，默认最后阅读时间为当前时间
+//                libraryEntity.setLastReadChapter();这两项为null
+        libraryRepo.save(libraryEntity);
+        return true;
     }
 }

@@ -1,6 +1,7 @@
 package com.mipa.common.librarydto;
 
 import com.mipa.common.bookdto.BookDTO;
+import com.mipa.common.chapterdto.ChapterInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -18,7 +19,7 @@ public class LibraryDTO {
 
     private BookDTO book;
 
-    private String lastReadChapter;
+    private ChapterInfoDTO lastReadChapter;
 
     private LocalDateTime lastReadAt;
 

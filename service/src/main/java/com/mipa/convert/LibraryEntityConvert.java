@@ -13,7 +13,7 @@ public class LibraryEntityConvert {
         dto.setId(library.getId());
         dto.setUserId(userId);
         dto.setBook(BookEntityConvert.toBookDTO(library.getBook()));
-        dto.setLastReadChapter(library.getLastReadChapter());
+        dto.setLastReadChapter(ChapterEntityConvert.toChapterInfoDTO(library.getChapter()));
         dto.setLastReadAt(library.getLastReadAt());
         dto.setAddedAt(library.getAddedAt());
         return dto;

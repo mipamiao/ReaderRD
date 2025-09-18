@@ -26,7 +26,9 @@ public class LibraryEntity {
     @JoinColumn(name = "book_id", nullable = false)
     private BookEntity book;
 
-    private String lastReadChapter;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chapter_id")
+    private ChapterEntity chapter;
 
     private LocalDateTime lastReadAt;
 

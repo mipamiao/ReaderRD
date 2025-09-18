@@ -18,7 +18,7 @@ public class LibraryRequestDTO {
 
     private String bookId;
 
-    private String lastReadChapter;
+    private String lastReadChapterId;
 
     private LocalDateTime lastReadAt;
 }
