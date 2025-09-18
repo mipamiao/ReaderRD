@@ -35,4 +35,7 @@ public interface BookRepository extends CrudRepository<BookEntity, String> {
     Integer updatedAt(
             @Param("bookId") String bookId,
             @Param("updatedAt") LocalDateTime updatedAt);
+
+    @Query("SELECT b FROM BookEntity b WHERE b.title LIKE %:keyword% OR b.description LIKE %:keyword% OR b.category LIKE %:keyword%")
+    Page<BookEntity> searchBooksByKeyword(@Param("keyword") String keyword, Pageable pageable);
 }
