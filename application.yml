@@ -30,3 +30,8 @@ logging:
         WordChat:
           Security:
             JwtAuthenticationFilter: DEBUG
+data:
+  settings:
+    avatars:
+      srcDir: "/statics/avatars"
+      dstDir: "D:/mipa/files/avatars"

@@ -27,6 +27,7 @@ public class UserEntityConvert {
         userInfoDTO.setEmail(userEntity.getEmail());
         userInfoDTO.setRole(userEntity.getRole());
         userInfoDTO.setCreatedAt(userEntity.getCreatedAt());
+        userInfoDTO.setAvatarUrl(userEntity.getAvatarUrl());
         return userInfoDTO;
     }
 

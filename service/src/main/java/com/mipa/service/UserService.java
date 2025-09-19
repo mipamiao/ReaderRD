@@ -1,14 +1,23 @@
 package com.mipa.service;
 
+import com.mipa.common.response.ApiResponse;
 import com.mipa.common.userDTO.UserInfoDTO;
 import com.mipa.common.userDTO.UserRegisterDTO;
 import com.mipa.convert.UserEntityConvert;
+import com.mipa.repository.BookRepository;
 import com.mipa.repository.UserRepository;
 import com.mipa.service.api.IUserService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 @Service
@@ -16,6 +25,15 @@ public class UserService implements IUserService {
 
     @Autowired
     private UserRepository userRepo;
+
+    @Value("${data.settings.avatars.dstDir}")
+    private String avatarsDstDir;
+
+    @Value("${data.settings.avatars.srcDir}")
+    private String avatarsSrcDir ;
+
+    @Autowired
+    FileService fileService;
 
 
     @Autowired
@@ -37,5 +55,43 @@ public class UserService implements IUserService {
     public Optional<UserInfoDTO> load(String userId){
         var entity = userRepo.findById(userId);
         return entity.map(UserEntityConvert::toUserInfoDTO);
+    }
+
+
+    @Transactional
+    private Boolean updateAvatar(String userId, String url) {
+        var userOpt = userRepo.findById(userId);
+        if (userOpt.isPresent()) {
+            return userRepo.updateAvatar(userId, url) == 1;
+        }
+        return false;
+    }
+
+    @Transactional
+    @Override
+    public String updateAvatar(MultipartFile file, String userId) {
+        if (file.isEmpty()) return null;
+        var userOpt = userRepo.findById(userId);
+        if (userOpt.isEmpty()) return null;
+
+        fileService.createDirIfNotExist(avatarsDstDir);
+
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+        String newFilename = userId + "_" + System.currentTimeMillis() + fileExtension;
+
+        Path path = Paths.get(avatarsDstDir + File.separator + newFilename);
+        if (!fileService.saveSmall(file, path)) {
+            return null;
+        }
+        var resultUrl = avatarsSrcDir + File.separator + newFilename;
+        updateAvatar(userId, resultUrl);
+
+        if (userOpt.get().getAvatarUrl() != null) {
+            var oldAvatarPath = userOpt.get().getAvatarUrl().replace(avatarsSrcDir, avatarsDstDir);
+            fileService.deleteSmall(oldAvatarPath);
+        }
+
+        return resultUrl;
     }
 }
