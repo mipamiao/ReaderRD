@@ -42,7 +42,7 @@ public class UserControllerPrivate {
         }
     }
 
-    @PostMapping(path = "/add-avatar", consumes = "multipart/form-data")
+    @PostMapping(path = "/update-avatar", consumes = "multipart/form-data")
     public ApiResponse<String> uploadFile(
             @RequestParam("avatar") MultipartFile file,
             @AuthenticationPrincipal UserSecurity userSecurity) {

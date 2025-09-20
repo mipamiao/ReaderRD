@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping(path = "/api/private/book", produces = "application/json")
@@ -67,5 +68,18 @@ public class BookControllerPrivate {
         dto.setTotal((int) res.getTotalElements());
 
         return ApiResponse.success(dto);
+    }
+
+    @PostMapping(path = "/update-cover-image", consumes = "multipart/form-data")
+    public ApiResponse<String> uploadBookCoverImg(
+            @RequestParam("coverImg") MultipartFile file,
+            @AuthenticationPrincipal UserSecurity userSecurity,
+            @RequestParam String bookId
+    ) {
+        var result = bookService.updateCoverImage(file, bookId, userSecurity.getUserId());
+        if (result != null) {
+            return ApiResponse.success(result);
+        }
+        return ApiResponse.success(null);
     }
 }

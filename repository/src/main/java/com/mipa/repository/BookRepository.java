@@ -38,4 +38,8 @@ public interface BookRepository extends CrudRepository<BookEntity, String> {
 
     @Query("SELECT b FROM BookEntity b WHERE b.title LIKE %:keyword% OR b.description LIKE %:keyword% OR b.category LIKE %:keyword%")
     Page<BookEntity> searchBooksByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+    @Modifying
+    @Query("Update BookEntity b set b.coverImage = :coverImg where b.bookId = :bookId")
+    Integer updateBookCoverImg(@Param("bookId") String bookId, @Param("coverImg") String coverImgUrl);
 }

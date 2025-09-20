@@ -1,5 +1,6 @@
 package com.mipa.service;
 
+import com.mipa.common.configuration.MyConfiguration;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.userDTO.UserInfoDTO;
 import com.mipa.common.userDTO.UserRegisterDTO;
@@ -10,6 +11,7 @@ import com.mipa.service.api.IUserService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,11 +28,8 @@ public class UserService implements IUserService {
     @Autowired
     private UserRepository userRepo;
 
-    @Value("${data.settings.avatars.dstDir}")
-    private String avatarsDstDir;
-
-    @Value("${data.settings.avatars.srcDir}")
-    private String avatarsSrcDir ;
+    @Autowired
+    MyConfiguration config;
 
     @Autowired
     FileService fileService;
@@ -74,21 +73,22 @@ public class UserService implements IUserService {
         var userOpt = userRepo.findById(userId);
         if (userOpt.isEmpty()) return null;
 
-        fileService.createDirIfNotExist(avatarsDstDir);
+        fileService.createDirIfNotExist(config.avatarsDstDir);
 
-        String originalFilename = file.getOriginalFilename();
-        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
-        String newFilename = userId + "_" + System.currentTimeMillis() + fileExtension;
+        String newFilename = fileService.generateUniqueFileName(
+                file.getOriginalFilename(), userId
+        );
 
-        Path path = Paths.get(avatarsDstDir + File.separator + newFilename);
+        Path path = Paths.get(fileService.combinePath(config.avatarsDstDir, newFilename));
         if (!fileService.saveSmall(file, path)) {
             return null;
         }
-        var resultUrl = avatarsSrcDir + File.separator + newFilename;
+        var resultUrl = fileService.combinePath(config.dataNetHost, config.avatarsSrcDir, newFilename);
         updateAvatar(userId, resultUrl);
 
         if (userOpt.get().getAvatarUrl() != null) {
-            var oldAvatarPath = userOpt.get().getAvatarUrl().replace(avatarsSrcDir, avatarsDstDir);
+            var oldAvatarPath = userOpt.get().getAvatarUrl().replace(
+                    fileService.combinePath(config.dataNetHost, config.avatarsSrcDir), config.avatarsDstDir);
             fileService.deleteSmall(oldAvatarPath);
         }
 

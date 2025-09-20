@@ -14,10 +14,21 @@ public class WebConfig implements WebMvcConfigurer {
     @Value("${data.settings.avatars.dstDir}")
     private String avatarsDstDir;
 
+    @Value("${data.settings.book-cover-img.srcDir}")
+    private String bookCoverImgsSrcDir;
+
+    @Value("${data.settings.book-cover-img.dstDir}")
+    private String bookCoverImgsDstDir;
+
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler(avatarsSrcDir+"/**")
                 .addResourceLocations("file:/"+avatarsDstDir)
+                .setCachePeriod(3600);
+
+        registry.addResourceHandler(bookCoverImgsSrcDir+"/**")
+                .addResourceLocations("file:/"+bookCoverImgsDstDir)
                 .setCachePeriod(3600);
     }
 }
