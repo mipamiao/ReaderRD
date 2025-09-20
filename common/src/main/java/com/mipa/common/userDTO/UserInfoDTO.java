@@ -11,4 +11,5 @@ public class UserInfoDTO {
     private String email;
     private String role;
     private LocalDateTime createdAt;
+    private String avatarUrl;
 }

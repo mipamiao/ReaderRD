@@ -2,6 +2,7 @@ package com.mipa.service;
 
 import com.mipa.common.bookdto.BookDTO;
 import com.mipa.common.bookdto.BookRequestDTO;
+import com.mipa.common.configuration.MyConfiguration;
 import com.mipa.convert.BookEntityConvert;
 import com.mipa.convert.UserEntityConvert;
 import com.mipa.model.BookEntity;
@@ -9,12 +10,18 @@ import com.mipa.model.UserEntity;
 import com.mipa.repository.BookRepository;
 import com.mipa.repository.UserRepository;
 import com.mipa.service.api.IBookService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -27,6 +34,12 @@ public class BookService implements IBookService {
 
     @Autowired
     UserRepository userRepo;
+
+    @Autowired
+    FileService fileService;
+
+    @Autowired
+    MyConfiguration config;
 
     public Page<BookDTO> findByPageable(int pageNumber, int pageSize) {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
@@ -99,5 +112,39 @@ public class BookService implements IBookService {
         Pageable pageable = PageRequest.of(pageNumber, pageSize);
         UserEntity user = UserEntityConvert.specifyUserId(userId);
         return bookRepo.findByAuthorId(user, pageable).map(BookEntityConvert::toBookDTO);
+    }
+
+    //todo 事务失败的回滚
+    @Transactional
+    public String updateCoverImage(MultipartFile file, String bookId, String userId) {
+        if (file.isEmpty()) return null;
+
+        var userOpt = userRepo.findById(userId);
+        if (userOpt.isEmpty()) return null;
+        var user = userOpt.get();
+
+        var bookOpt = bookRepo.findById(bookId);
+        if (bookOpt.isEmpty()) return null;
+        var book = bookOpt.get();
+
+        if (book.getAuthor() != null && book.getAuthor().getUserId().equals(userId)) {//todo n+1
+
+            fileService.createDirIfNotExist(config.bookCoverImgsDstDir);
+            String newFilename = fileService.generateUniqueFileName(
+                    file.getOriginalFilename(), bookId
+            );
+
+            Path path = Paths.get(fileService.combinePath(config.bookCoverImgsDstDir, newFilename));
+            if (!fileService.saveSmall(file, path)) return null;
+
+            var resultUrl = fileService.combinePath(config.dataNetHost, config.bookCoverImgsSrcDir, newFilename);
+            if (book.getCoverImage() != null) {
+                var oldCoverPath = book.getCoverImage().replace(fileService.combinePath(
+                        config.dataNetHost, config.bookCoverImgsSrcDir), config.bookCoverImgsDstDir);
+                fileService.deleteSmall(oldCoverPath);
+            }
+            if (bookRepo.updateBookCoverImg(bookId, resultUrl) == 1) return resultUrl;
+        }
+        return null;
     }
 }

@@ -31,4 +31,7 @@ public class UserEntity {
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column
+    private String avatarUrl;
 }

@@ -29,8 +29,8 @@ public class SecurityConfig {
                 ).sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry -> registry  // 使用新的 Lambda 风格
-                        .requestMatchers("/api/authen/**", "/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**", "/api/public/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/statics/**", "/api/public/**").permitAll()
+                        //.requestMatchers("/**").permitAll()
                         .anyRequest().authenticated()
                 ).formLogin(AbstractHttpConfigurer::disable).addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class).build();
     }
