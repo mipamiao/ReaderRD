@@ -83,15 +83,14 @@ public class UserService implements IUserService {
         if (!fileService.saveSmall(file, path)) {
             return null;
         }
-        var resultUrl = fileService.combinePath(config.dataNetHost, config.avatarsSrcDir, newFilename);
+        var resultUrl = fileService.combinePath(config.avatarsSrcDir, newFilename);
         updateAvatar(userId, resultUrl);
 
         if (userOpt.get().getAvatarUrl() != null) {
-            var oldAvatarPath = userOpt.get().getAvatarUrl().replace(
-                    fileService.combinePath(config.dataNetHost, config.avatarsSrcDir), config.avatarsDstDir);
+            var oldAvatarPath = userOpt.get().getAvatarUrl().replace(config.avatarsSrcDir, config.avatarsDstDir);
             fileService.deleteSmall(oldAvatarPath);
         }
 
-        return resultUrl;
+        return fileService.combinePath(config.dataNetHost, resultUrl);
     }
 }
