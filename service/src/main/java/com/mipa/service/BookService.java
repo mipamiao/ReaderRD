@@ -137,13 +137,13 @@ public class BookService implements IBookService {
             Path path = Paths.get(fileService.combinePath(config.bookCoverImgsDstDir, newFilename));
             if (!fileService.saveSmall(file, path)) return null;
 
-            var resultUrl = fileService.combinePath(config.dataNetHost, config.bookCoverImgsSrcDir, newFilename);
+            var resultUrl = fileService.combinePath( config.bookCoverImgsSrcDir, newFilename);
             if (book.getCoverImage() != null) {
-                var oldCoverPath = book.getCoverImage().replace(fileService.combinePath(
-                        config.dataNetHost, config.bookCoverImgsSrcDir), config.bookCoverImgsDstDir);
+                var oldCoverPath = book.getCoverImage().replace(config.bookCoverImgsSrcDir, config.bookCoverImgsDstDir);
                 fileService.deleteSmall(oldCoverPath);
             }
-            if (bookRepo.updateBookCoverImg(bookId, resultUrl) == 1) return resultUrl;
+            if (bookRepo.updateBookCoverImg(bookId, resultUrl) == 1)
+                return fileService.combinePath(config.dataNetHost, resultUrl);
         }
         return null;
     }
