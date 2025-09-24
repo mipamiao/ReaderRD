@@ -26,12 +26,15 @@ logging:
               BasicBinder: TRACE
 
     com:
-      example:
-        WordChat:
+      mipa:
+        ReaderRD:
           Security:
             JwtAuthenticationFilter: DEBUG
+
+
 my-settings:
   file-separator: "/"
+  secret: "mipa-secret:mipamipamiaowakuwakupikaqiu"
 data:
   settings:
     data-net:

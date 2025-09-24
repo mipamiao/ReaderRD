@@ -2,11 +2,12 @@ package com.mipa.auth.Security;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 public class JwtUtil {
-    private static final Key SECRET = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    public static  Key SECRET;
     private static final long EXPIRATION_TIME = 86400000; // 1 day in milliseconds
 
     public static String generateToken(TokenInfo tokenInfo){
