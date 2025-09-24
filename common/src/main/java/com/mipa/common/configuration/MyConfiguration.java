@@ -5,6 +5,10 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class MyConfiguration {
+
+    @Value("${my-settings.secret}")
+    public String jwtSecretKey;
+
     @Value("${data.settings.book-cover-img.dstDir}")
     public String bookCoverImgsDstDir;
 

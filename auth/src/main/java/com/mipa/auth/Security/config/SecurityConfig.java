@@ -1,5 +1,9 @@
 package com.mipa.auth.Security.config;
 import com.mipa.auth.Security.JwtAuthenticationFilter;
+import com.mipa.auth.Security.JwtUtil;
+import com.mipa.common.configuration.MyConfiguration;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -12,8 +16,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+import java.nio.charset.StandardCharsets;
+
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    public MyConfiguration myConfiguration;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -34,12 +43,17 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 ).formLogin(AbstractHttpConfigurer::disable).addFilterAt(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class).build();
     }
+
     @Bean
     JwtAuthenticationFilter jwtAuthenticationFilter(){
+        JwtUtil.SECRET = Keys.hmacShaKeyFor(myConfiguration.jwtSecretKey.getBytes(StandardCharsets.UTF_8));
         return new JwtAuthenticationFilter();
     }
+
     @Bean
     AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
         return configuration.getAuthenticationManager();
     }
+
+
 }
