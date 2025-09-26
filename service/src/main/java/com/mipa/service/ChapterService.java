@@ -2,6 +2,7 @@ package com.mipa.service;
 
 import com.mipa.common.chapterdto.ChapterInfoAndContentDTO;
 import com.mipa.common.chapterdto.ChapterInfoDTO;
+import com.mipa.common.chapterdto.ChapterInfoListDTO;
 import com.mipa.common.chapterdto.ChapterRequestDTO;
 import com.mipa.convert.BookEntityConvert;
 import com.mipa.convert.ChapterEntityConvert;
@@ -17,8 +18,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 //todo save到update的转变
 @Service
@@ -89,9 +93,10 @@ public class ChapterService implements IChapterService {
     }
 
     //todo 以后改为分页查询
-    public List<ChapterInfoDTO> listChapters(String bookId) {
-        var chapters = chapterRepo.findByBookIdOrderByOrderAsc(BookEntityConvert.specifyBookId(bookId));
-        return chapters.stream().map(ChapterEntityConvert::toChapterInfoDTO).toList();
+    public Page<ChapterInfoDTO> listChapters(String bookId, Integer pageNum, Integer pageSize) {
+        var pageable = PageRequest.of(pageNum, pageSize);
+        var chapters = chapterRepo.findByBookIdOrderByOrderAsc(BookEntityConvert.specifyBookId(bookId), pageable);
+        return chapters.map(ChapterEntityConvert::toChapterInfoDTO);
     }
 
     //todo 这里content要是很大的话，可能会有性能问题
