@@ -30,6 +30,16 @@ public class ChapterPublicController {
         return ApiResponse.unauthorized(null);
     }
 
+    @GetMapping(path = "get-by-order")
+    public ApiResponse<ChapterInfoAndContentDTO> getChapterByOrder(
+            @RequestParam(name = "bookId") String bookId,
+            @RequestParam(name = "order") Integer order
+    ) {
+        var result = chapterService.getChapterInfoAndContent(bookId, order);
+        if (result != null) return ApiResponse.success(result);
+        return ApiResponse.unauthorized(null);
+    }
+
 
     @GetMapping(path = "list")
     public ApiResponse<ChapterInfoListDTO> listChapters(
@@ -43,6 +53,15 @@ public class ChapterPublicController {
         dto.setTotal((int) page.getTotalElements());
         dto.setPageNumber(pageNumber);
         return ApiResponse.success(dto);
+    }
+
+    @GetMapping(path = "list-all")
+    public ApiResponse<List<ChapterInfoDTO>> listChapters(
+            @RequestParam(name = "bookId") String bookId
+    ) {
+        var result = chapterService.listAllChapters(bookId);
+        if (result != null) return ApiResponse.success(result);
+        return ApiResponse.unauthorized(null);
     }
 
     @GetMapping(path = "info")

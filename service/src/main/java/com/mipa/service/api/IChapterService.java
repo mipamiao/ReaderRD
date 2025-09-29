@@ -14,4 +14,6 @@ public interface IChapterService {
     public ChapterInfoDTO getChapterInfo(String bookId, String chapterId);
     public Page<ChapterInfoDTO> listChapters(String bookId, Integer pageNum, Integer pageSize);
     public ChapterInfoAndContentDTO getChapterInfoAndContent( String bookId, String chapterId);
+    public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, Integer order);
+    List<ChapterInfoDTO> listAllChapters(String bookId);
 }
