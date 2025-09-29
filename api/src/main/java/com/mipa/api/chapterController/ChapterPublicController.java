@@ -2,6 +2,7 @@ package com.mipa.api.chapterController;
 
 import com.mipa.common.chapterdto.ChapterInfoAndContentDTO;
 import com.mipa.common.chapterdto.ChapterInfoDTO;
+import com.mipa.common.chapterdto.ChapterInfoListDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.service.ChapterService;
 import com.mipa.service.api.IChapterService;
@@ -29,12 +30,36 @@ public class ChapterPublicController {
         return ApiResponse.unauthorized(null);
     }
 
+    @GetMapping(path = "get-by-order")
+    public ApiResponse<ChapterInfoAndContentDTO> getChapterByOrder(
+            @RequestParam(name = "bookId") String bookId,
+            @RequestParam(name = "order") Integer order
+    ) {
+        var result = chapterService.getChapterInfoAndContent(bookId, order);
+        if (result != null) return ApiResponse.success(result);
+        return ApiResponse.unauthorized(null);
+    }
+
 
     @GetMapping(path = "list")
+    public ApiResponse<ChapterInfoListDTO> listChapters(
+            @RequestParam(name = "bookId") String bookId,
+            @RequestParam(defaultValue = "0", name = "pageNumber") Integer pageNumber,
+            @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize
+    ) {
+        var page = chapterService.listChapters(bookId, pageNumber,pageSize);
+        ChapterInfoListDTO dto = new ChapterInfoListDTO();
+        dto.setChapters(page.getContent());
+        dto.setTotal((int) page.getTotalElements());
+        dto.setPageNumber(pageNumber);
+        return ApiResponse.success(dto);
+    }
+
+    @GetMapping(path = "list-all")
     public ApiResponse<List<ChapterInfoDTO>> listChapters(
             @RequestParam(name = "bookId") String bookId
     ) {
-        var result = chapterService.listChapters(bookId);
+        var result = chapterService.listAllChapters(bookId);
         if (result != null) return ApiResponse.success(result);
         return ApiResponse.unauthorized(null);
     }

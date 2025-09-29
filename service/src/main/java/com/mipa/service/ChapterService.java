@@ -19,6 +19,8 @@ import java.util.Objects;
 
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 //todo save到update的转变
 @Service
@@ -37,6 +39,8 @@ public class ChapterService implements IChapterService {
     public ChapterInfoDTO addChapter(ChapterRequestDTO dto) {
         var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), null);
         if (resultData.result) {
+            var res = chapterRepo.findChapterByBookAndOrder(resultData.book, dto.getOrder());
+            if (res.isPresent()) return null;
             var chapterEntity = ChapterEntityConvert.fromChapterRequestDTO(dto);
             chapterEntity.setCreatedAt(LocalDateTime.now());
             chapterEntity.setUpdatedAt(LocalDateTime.now());
@@ -88,9 +92,14 @@ public class ChapterService implements IChapterService {
         return null;
     }
 
-    //todo 以后改为分页查询
-    public List<ChapterInfoDTO> listChapters(String bookId) {
-        var chapters = chapterRepo.findByBookIdOrderByOrderAsc(BookEntityConvert.specifyBookId(bookId));
+    public Page<ChapterInfoDTO> listChapters(String bookId, Integer pageNum, Integer pageSize) {
+        var pageable = PageRequest.of(pageNum, pageSize);
+        var chapters = chapterRepo.findByBookOrderByOrderDesc(BookEntityConvert.specifyBookId(bookId), pageable);
+        return chapters.map(ChapterEntityConvert::toChapterInfoDTO);
+    }
+
+    public List<ChapterInfoDTO> listAllChapters(String bookId) {
+        var chapters = chapterRepo.findAllByBookOrderByOrderDesc(BookEntityConvert.specifyBookId(bookId));
         return chapters.stream().map(ChapterEntityConvert::toChapterInfoDTO).toList();
     }
 
@@ -98,6 +107,17 @@ public class ChapterService implements IChapterService {
     public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, String chapterId) {
         var chapterOpt = chapterRepo.findById(chapterId);
         if (chapterOpt.isPresent()) {
+            var chapter = chapterOpt.get();
+            if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
+                return ChapterEntityConvert.toChapterInfoAndContentDTO(chapter);
+            }
+        }
+        return null;
+    }
+
+    public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, Integer order){
+        var chapterOpt = chapterRepo.findChapterByBookAndOrder(BookEntityConvert.specifyBookId(bookId), order);
+        if(chapterOpt.isPresent()){
             var chapter = chapterOpt.get();
             if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
                 return ChapterEntityConvert.toChapterInfoAndContentDTO(chapter);
