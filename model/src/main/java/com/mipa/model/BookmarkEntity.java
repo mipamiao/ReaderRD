@@ -22,6 +22,9 @@ public class BookmarkEntity {
     @Column(nullable = false)
     private String chapterId;
 
+    @Column(nullable = false, name = "chapter_order")
+    private Integer order;
+
     private String chapterTitle;
 
     private Integer page;

@@ -86,8 +86,14 @@ public class BookmarkService implements IBookmarkService {
     }
 
     @Override
-    public Page<BookmarkInfoDTO> listAllBookmark(String userId, String bookId, Integer pageNum, Integer pageSize) {
+    public Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize) {
         return null;
+    }
+
+    @Override
+    public BookmarkInfoDTO getBookmark(String userId, String bookId, String chapterId){
+        var bookmarkOpt = bookmarkRepo.findByUserIdAndBookIdAndChapterId(userId, bookId, chapterId);
+        return bookmarkOpt.map(BookmarkEntityConvert::toBookmarkInfoDTO).orElse(null);
     }
 
     //用来确保

@@ -4,6 +4,7 @@ import com.mipa.auth.Security.UserSecurity;
 import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
 import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
 import com.mipa.common.response.ApiResponse;
+import com.mipa.service.BookmarkService;
 import com.mipa.service.api.IBookmarkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,6 +40,17 @@ public class BookmarkControllerPrivate {
         if (res)
             return ApiResponse.success(res);
         return ApiResponse.unauthorized(null);
+    }
+
+    @GetMapping(path = "get")
+    public ApiResponse<BookmarkInfoDTO> getBookmark(
+            @AuthenticationPrincipal UserSecurity userSecurity,
+            @RequestParam(name = "bookId") String bookId,
+            @RequestParam(name = "chapterId") String chapterId
+    ){
+        var res = bookmarkService.getBookmark(userSecurity.getUserId() , bookId, chapterId);
+        if(res==null)return ApiResponse.unauthorized(null);
+        return ApiResponse.success(res);
     }
 
     @GetMapping(path = "list-all")

@@ -16,5 +16,7 @@ public interface IBookmarkService {
 
     List<BookmarkInfoDTO> listAllBookmark(String userId, String bookId);
 
-    Page<BookmarkInfoDTO> listAllBookmark(String userId, String bookId, Integer pageNum, Integer pageSize);
+    Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize);
+
+    BookmarkInfoDTO getBookmark(String userId, String bookId, String chapterId);
 }
