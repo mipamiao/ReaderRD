@@ -16,20 +16,20 @@
     </resultMap>
 
     <select id="selectById" resultMap="UserResultMap" parameterType="String">
-        SELECT * FROM users WHERE id = #{id}
+        SELECT * FROM user WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="UserResultMap">
-        SELECT * FROM users
+        SELECT * FROM user
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.User">
-        INSERT INTO users (id, name, email, password, role, avatar_url)
+        INSERT INTO user (id, name, email, password, role, avatar_url)
         VALUES (#{id}, #{name}, #{email}, #{password}, #{role}, #{avatarUrl})
     </insert>
 
     <update id="update" parameterType="com.mipa.model.User">
-        UPDATE users
+        UPDATE user
         SET name = #{name},
         email = #{email},
         password = #{password},
@@ -39,7 +39,19 @@
     </update>
 
     <delete id="delete" parameterType="String">
-        DELETE FROM users WHERE id = #{id}
+        DELETE FROM user WHERE id = #{id}
     </delete>
+
+    <select id="selectByName" parameterType="String" resultMap="UserResultMap">
+        SELECT *
+        FROM user
+        WHERE name = #{name}
+    </select>
+    
+    <update id="updateAvatar" parameterType="map">
+        UPDATE user
+        SET avatar_url = #{avatarUrl}
+        WHERE id = #{id}
+    </update>
 
 </mapper>

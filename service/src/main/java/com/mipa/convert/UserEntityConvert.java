@@ -12,7 +12,7 @@ public class UserEntityConvert {
 
     public static UserEntity fromUserRegisterDTO(UserRegisterDTO userRegisterDTO){
         UserEntity userEntity = new UserEntity();
-        userEntity.setUserName(userRegisterDTO.getUserName());
+        userEntity.setUserName(userRegisterDTO.getName());
         userEntity.setPassword(userRegisterDTO.getPassword());
         userEntity.setEmail(userRegisterDTO.getEmail());
         userEntity.setRole(userRegisterDTO.getRole());
@@ -22,8 +22,8 @@ public class UserEntityConvert {
 
     public static UserInfoDTO toUserInfoDTO(UserEntity userEntity) {
         UserInfoDTO userInfoDTO = new UserInfoDTO();
-        userInfoDTO.setUserId(userEntity.getUserId());
-        userInfoDTO.setUserName(userEntity.getUserName());
+        userInfoDTO.setId(userEntity.getUserId());
+        userInfoDTO.setName(userEntity.getUserName());
         userInfoDTO.setEmail(userEntity.getEmail());
         userInfoDTO.setRole(userEntity.getRole());
         userInfoDTO.setCreatedAt(userEntity.getCreatedAt());

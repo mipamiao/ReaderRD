@@ -5,10 +5,14 @@ import com.mipa.common.response.ApiResponse;
 import com.mipa.common.userDTO.UserInfoDTO;
 import com.mipa.common.userDTO.UserRegisterDTO;
 import com.mipa.convert.UserEntityConvert;
+import com.mipa.mapper.UserMapper;
+import com.mipa.model.User;
 import com.mipa.repository.BookRepository;
 import com.mipa.repository.UserRepository;
 import com.mipa.service.api.IUserService;
+import com.mipa.utils.IdUtil;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -26,7 +30,7 @@ import java.util.Optional;
 public class UserService implements IUserService {
 
     @Autowired
-    private UserRepository userRepo;
+    private UserMapper userMapper;
 
     @Autowired
     MyConfiguration config;
@@ -40,11 +44,13 @@ public class UserService implements IUserService {
 
     @Override
     public boolean save(UserRegisterDTO userRegisterDTO){
-        var entity = UserEntityConvert.fromUserRegisterDTO(userRegisterDTO);
+        var user = new User();
+        BeanUtils.copyProperties(userRegisterDTO, user);
+        user.setId(IdUtil.uuid());
 
-        if(userRepo.findByUserName(entity.getUserName()).isEmpty()){
-            entity.setPassword(passwordEncoder.encode(entity.getPassword()));
-            userRepo.save(entity);
+        if(userMapper.selectByName(user.getName()).isEmpty()){
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
+            userMapper.insert(user);
             return true;
         }
         return false;
@@ -52,16 +58,21 @@ public class UserService implements IUserService {
 
     @Override
     public Optional<UserInfoDTO> load(String userId){
-        var entity = userRepo.findById(userId);
-        return entity.map(UserEntityConvert::toUserInfoDTO);
+        var user = userMapper.selectById(userId);
+        return user.map(item->{
+            var dto = new UserInfoDTO();
+            BeanUtils.copyProperties(item, dto);
+            return dto;
+        });
     }
 
 
     @Transactional
     private Boolean updateAvatar(String userId, String url) {
-        var userOpt = userRepo.findById(userId);
-        if (userOpt.isPresent()) {
-            return userRepo.updateAvatar(userId, url) == 1;
+        var userOpt = userMapper.selectById(userId);
+        if(userOpt.isPresent()){
+            userMapper.updateAvatar(userId, url);
+            return true;
         }
         return false;
     }
@@ -69,9 +80,10 @@ public class UserService implements IUserService {
     @Transactional
     @Override
     public String updateAvatar(MultipartFile file, String userId) {
-        if (file.isEmpty()) return null;
-        var userOpt = userRepo.findById(userId);
-        if (userOpt.isEmpty()) return null;
+
+        if(file.isEmpty())return null;
+        var userOpt = userMapper.selectById(userId);
+        if(userOpt.isEmpty())return null;
 
         fileService.createDirIfNotExist(config.avatarsDstDir);
 
@@ -91,6 +103,7 @@ public class UserService implements IUserService {
             fileService.deleteSmall(oldAvatarPath);
         }
 
-        return fileService.combinePath(config.dataNetHost, resultUrl);
+        return resultUrl;
+
     }
 }
