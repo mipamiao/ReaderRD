@@ -31,6 +31,12 @@ logging:
           Security:
             JwtAuthenticationFilter: DEBUG
 
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true       # 页码 < 1 自动设置为 1，页码超过总页数自动设置为最后一页
+  support-methods-arguments: true
+  params: count=countSql
+
 
 my-settings:
   file-separator: "/"

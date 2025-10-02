@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.BookTagMapper">
+
+    <resultMap id="BookTagResultMap" type="com.mipa.model.BookTag">
+        <id property="id" column="id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="tagId" column="tag_id"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="BookTagResultMap" parameterType="String">
+        SELECT * FROM book_tag WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BookTagResultMap">
+        SELECT * FROM book_tag
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.BookTag">
+        INSERT INTO book_tag (id, book_id, tag_id)
+        VALUES (#{id}, #{bookId}, #{tagId})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.BookTag">
+        UPDATE book_tag
+        SET book_id = #{bookId},
+        tag_id = #{tagId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM book_tag WHERE id = #{id}
+    </delete>
+
+</mapper>

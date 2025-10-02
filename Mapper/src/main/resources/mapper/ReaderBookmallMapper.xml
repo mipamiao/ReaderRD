@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.ReaderBookmallMapper">
+
+    <resultMap id="ReaderBookmallResultMap" type="com.mipa.model.ReaderBookmall">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="note" column="note"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ReaderBookmallResultMap" parameterType="String">
+        SELECT * FROM reader_bookmall WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ReaderBookmallResultMap">
+        SELECT * FROM reader_bookmall
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.ReaderBookmall">
+        INSERT INTO reader_bookmall (id, user_id, book_id, chapter_id, note, chapter_order)
+        VALUES (#{id}, #{userId}, #{bookId}, #{chapterId}, #{note}, #{chapterOrder})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.ReaderBookmall">
+        UPDATE reader_bookmall
+        SET user_id = #{userId},
+        book_id = #{bookId},
+        chapter_id = #{chapterId},
+        note = #{note},
+        chapter_order = #{chapterOrder},
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM reader_bookmall WHERE id = #{id}
+    </delete>
+
+</mapper>

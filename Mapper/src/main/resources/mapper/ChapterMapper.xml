@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.ChapterMapper">
+
+    <resultMap id="ChapterResultMap" type="com.mipa.model.Chapter">
+        <id property="id" column="id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="name" column="name"/>
+        <result property="content" column="content"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ChapterResultMap" parameterType="String">
+        SELECT * FROM chapters WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ChapterResultMap">
+        SELECT * FROM chapters
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.Chapter">
+        INSERT INTO chapters (id, book_id, name, content, chapter_order)
+        VALUES (#{id}, #{bookId}, #{name}, #{content}, #{chapterOrder})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.Chapter">
+        UPDATE chapters
+        SET book_id = #{bookId},
+        name = #{name},
+        content = #{content},
+        chapter_order = #{chapterOrder},
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM chapters WHERE id = #{id}
+    </delete>
+
+</mapper>

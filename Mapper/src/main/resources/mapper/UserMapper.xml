@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.UserMapper">
+
+    <resultMap id="UserResultMap" type="com.mipa.model.User">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="email" column="email"/>
+        <result property="password" column="password"/>
+        <result property="role" column="role"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="avatarUrl" column="avatar_url"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="UserResultMap" parameterType="String">
+        SELECT * FROM users WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="UserResultMap">
+        SELECT * FROM users
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.User">
+        INSERT INTO users (id, name, email, password, role, avatar_url)
+        VALUES (#{id}, #{name}, #{email}, #{password}, #{role}, #{avatarUrl})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.User">
+        UPDATE users
+        SET name = #{name},
+        email = #{email},
+        password = #{password},
+        role = #{role},
+        avatar_url = #{avatarUrl}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM users WHERE id = #{id}
+    </delete>
+
+</mapper>

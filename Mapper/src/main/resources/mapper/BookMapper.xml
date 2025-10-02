@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.BookMapper">
+    <resultMap id="BookResultMap" type="com.mipa.model.Book">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="category" column="category"/>
+        <result property="chapterCount" column="chapter_count"/>
+        <result property="authorId" column="author_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultType="resultMap" parameterType="String">
+        SELECT * FROM book WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultType="resultMap" >
+        SELECT * FROM book
+    </select>
+
+    <select id="insert" parameterType="com.mipa.model.Book">
+        INSERT INTO book (id, name, description, category, chapter_count, cover_url, author_id )
+        VALUES (#{id}, #{name}, #{description}, #{category}, #{chapterCount}, #{coverUrl}, #{authorId})
+    </select>
+
+    <select id="update" parameterType="com.mipa.model.Book">
+        UPDATE book
+        SET name = #{name},
+            description = #{description},
+            cover_url = #{coverUrl},
+            category = #{category},
+            chapter_count = #{chapterCount},
+            author_id = #{authorId},
+        WHERE id = #{id}
+    </select>
+
+    <select id="delete" parameterType="String">
+        DELETE FROM book WHERE id = #{id}
+    </select>
+
+
+</mapper>
