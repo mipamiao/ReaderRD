@@ -62,7 +62,7 @@ public class FileService {
             if (!stringBuilder.isEmpty() && !stringBuilder.toString().endsWith(config.fileSeparator)) {
                 stringBuilder.append(config.fileSeparator);
             }
-            stringBuilder.append(path.startsWith(config.fileSeparator) ? path.substring(1) : path);
+            stringBuilder.append( path);
         }
         return stringBuilder.toString();
     }

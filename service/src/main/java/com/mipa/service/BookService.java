@@ -143,7 +143,7 @@ public class BookService implements IBookService {
                 fileService.deleteSmall(oldCoverPath);
             }
             if (bookRepo.updateBookCoverImg(bookId, resultUrl) == 1)
-                return fileService.combinePath(config.dataNetHost, resultUrl);
+                return resultUrl;
         }
         return null;
     }
