@@ -23,6 +23,8 @@ public interface BookMapper {
 
     int delete(@Param("id") String id);
 
+    List<Book> selectAllByIds(@Param("ids") List<String> ids);
+
     List<Book> selectByCategory(@Param("category") String category);
 
     List<Book> selectByAuthorId(@Param("authorId") String authorId);
@@ -42,4 +44,5 @@ public interface BookMapper {
     int updateChapterCount(@Param("id") String id, @Param("chapterCount") Integer chapterCount);
 
     int updateUpdatedAtById(@Param("id") String id);
+
 }

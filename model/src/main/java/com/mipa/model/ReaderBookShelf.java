@@ -1,24 +1,21 @@
-package com.mipa.common.librarydto;
+package com.mipa.model;
 
-import com.mipa.common.bookdto.BookDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class LibraryRequestDTO {
-
+public class ReaderBookShelf {
     private String id;
-
     private String userId;
-
     private String bookId;
-
     private String chapterId;
-
     private Integer chapterOrder;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }

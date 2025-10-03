@@ -23,10 +23,7 @@ public class BookDTO {
 
     private String category;
 
-
     private Integer chapterCount;
-
-    private String authorName; // 通常DTO中只存储作者ID而不是整个作者对象
 
     private LocalDateTime createdAt;
 

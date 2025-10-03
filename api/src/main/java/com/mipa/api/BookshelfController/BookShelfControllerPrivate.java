@@ -1,44 +1,48 @@
-package com.mipa.api.libraryController;
+package com.mipa.api.BookshelfController;
+
 
 import com.mipa.auth.Security.UserSecurity;
 import com.mipa.common.librarydto.LibraryDTO;
 import com.mipa.common.librarydto.LibraryRequestDTO;
 import com.mipa.common.response.ApiResponse;
+import com.mipa.common.vo.BookShelfVO;
+import com.mipa.service.BookShelfService;
 import com.mipa.service.LibraryService;
+import com.mipa.service.api.IBookShelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 
 @RestController
-@RequestMapping(path = "/api/private/library", produces = "application/json")
-public class LibraryPrivateController {
+@RequestMapping(path = "/api/private/bookshelf", produces = "application/json")
+public class BookShelfControllerPrivate {
+
     @Autowired
-    LibraryService libraryService;
+    IBookShelfService bookShelfService;
 
     @GetMapping(path = "/list")
-    public ApiResponse<List<LibraryDTO>> getUserLibrary(
+    public ApiResponse<List<BookShelfVO>> getUserBookshelf(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam(defaultValue = "0", name = "pageNumber") Integer pageNumber,
             @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize
     ) {
-        var libraryList = libraryService.getUserLibrary(userSecurity.getUserId(), pageNumber, pageSize);
-        if (libraryList != null) {
-            return ApiResponse.success(libraryList.getContent());
 
+        var bookshelfList = bookShelfService.getUserBookShelf(userSecurity.getUserId(), pageNumber, pageSize);
+        if(bookshelfList != null){
+            return ApiResponse.success(bookshelfList.datas());
         }
         return ApiResponse.status(HttpStatus.NOT_FOUND, "User not found", null);
     }
 
     @PostMapping(path = "/add" , consumes = "application/json" )
-    public ApiResponse<Boolean> addLibrary(
+    public ApiResponse<Boolean> addBookshelf(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam String bookId
     ) {
-        boolean result = libraryService.addToLibrary(userSecurity.getUserId(), bookId);
+        boolean result = bookShelfService.addToBookShelf(userSecurity.getUserId(), bookId);
         if (result) {
             return ApiResponse.success(true);
         } else {
@@ -47,11 +51,11 @@ public class LibraryPrivateController {
     }
 
     @PostMapping(path = "/update", consumes = "application/json" )
-    public ApiResponse<Boolean> updateLibrary(
+    public ApiResponse<Boolean> updateBookshelf(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestBody LibraryRequestDTO dto
     ) {
-        boolean result = libraryService.updateLibrary(userSecurity.getUserId(), dto.getBookId(), dto);
+        boolean result = bookShelfService.updateBookShelf(userSecurity.getUserId(), dto.getBookId(), dto);
         if (result) {
             return ApiResponse.success(true);
         } else {
@@ -60,11 +64,11 @@ public class LibraryPrivateController {
     }
 
     @DeleteMapping(path = "/remove")
-    public ApiResponse<Boolean> removeLibrary(
+    public ApiResponse<Boolean> removeBookshelf(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam String bookId
     ) {
-        boolean result = libraryService.removeFromLibrary(userSecurity.getUserId(), bookId);
+        boolean result = bookShelfService.removeFromBookShelf(userSecurity.getUserId(), bookId);
         if (result) {
             return ApiResponse.success(true);
         } else {

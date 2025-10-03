@@ -20,7 +20,7 @@ public class BookEntityConvert {
                 .category(bookEntity.getCategory())
                 //.tags(bookEntity.getTags())
                 .chapterCount(bookEntity.getChaptersCount())
-                .authorName(bookEntity.getAuthor() != null ? bookEntity.getAuthor().getUserName() : null)
+                //.authorName(bookEntity.getAuthor() != null ? bookEntity.getAuthor().getUserName() : null)
                 .createdAt(bookEntity.getCreatedAt())
                 .updatedAt(bookEntity.getUpdatedAt())
                 .build();

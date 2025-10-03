@@ -3,6 +3,10 @@ package com.mipa.service;
 import com.mipa.common.librarydto.LibraryDTO;
 import com.mipa.common.librarydto.LibraryRequestDTO;
 import com.mipa.convert.LibraryEntityConvert;
+import com.mipa.mapper.BookMapper;
+import com.mipa.mapper.ChapterMapper;
+import com.mipa.mapper.ReaderProgressMapper;
+import com.mipa.mapper.UserMapper;
 import com.mipa.model.BookEntity;
 import com.mipa.model.ChapterEntity;
 import com.mipa.model.LibraryEntity;
@@ -86,7 +90,7 @@ public class LibraryService implements ILibraryService {
         if (userOpt.isPresent()) {
             var bookOpt = bookRepo.findById(bookId);
             if (bookOpt.isPresent()) {
-                var chapterOpt = chapterRepo.findById(dto.getLastReadChapterId());
+                var chapterOpt = chapterRepo.findById(dto.getChapterId());
                 ChapterEntity chapter;
                 if (chapterOpt.isPresent() && chapterOpt.get().getBook().getBookId().equals(bookId))
                     chapter = chapterOpt.get();

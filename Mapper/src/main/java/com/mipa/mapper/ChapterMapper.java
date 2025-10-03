@@ -27,4 +27,5 @@ public interface ChapterMapper {
     Optional<Chapter> selectInfoByBookIdAndOrder(@Param("bookId") String bookId, @Param("chapterOrder") Integer order);
 
     Optional<Chapter> selectByBookIdAndOrder(@Param("bookId") String bookId, @Param("chapterOrder") Integer chapterOrder);
+
 }

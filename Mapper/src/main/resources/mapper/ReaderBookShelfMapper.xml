@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.ReaderBookShelfMapper">
+
+    <resultMap id="ReaderBookShelfResultMap" type="com.mipa.model.ReaderBookShelf">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ReaderBookShelfResultMap" parameterType="String">
+        SELECT * FROM reader_bookshelf WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ReaderBookShelfResultMap">
+        SELECT * FROM reader_bookshelf
+    </select>
+
+    <select id="selectByUserIdAndBookId" resultMap="ReaderBookShelfResultMap" parameterType="String">
+        SELECT * FROM reader_bookshelf
+        WHERE user_id = #{userId} AND book_id = #{bookId}
+    </select>
+    <select id="selectByUserId" resultMap="ReaderBookShelfResultMap" parameterType="String">
+        SELECT * FROM reader_bookshelf
+        WHERE user_id = #{userId}
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.ReaderBookShelf">
+        INSERT INTO reader_bookshelf (id, user_id, book_id, chapter_id, chapter_order)
+        VALUES (#{id}, #{userId}, #{bookId}, #{chapterId}, #{chapterOrder})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.ReaderBookShelf">
+        UPDATE reader_bookshelf
+        SET user_id = #{userId},
+        book_id = #{bookId},
+        chapter_id = #{chapterId},
+        chapter_order = #{chapterOrder}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM reader_bookshelf WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -89,7 +89,7 @@
     </select>
 
     <select id="selectByKeyword" resultMap="BookResultMap" parameterType="String">
-        SELECT DISTINCT
+        SELECT
             b.id,
             b.name,
             b.description,
@@ -127,6 +127,14 @@
     <select id="selectAllBookAndAuthorByAuthorId" resultMap="BookAndAuthorResultMap">
         <include refid="BookAndAuthorBaseSelect"/>
         WHERE b.author_id = #{authorId}
+    </select>
+
+    <select id="selectAllByIds" resultMap="BookResultMap" parameterType="list">
+        SELECT * FROM book
+        WHERE id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
     </select>
 
     <update id="updateCoverUrl" parameterType="map" >
