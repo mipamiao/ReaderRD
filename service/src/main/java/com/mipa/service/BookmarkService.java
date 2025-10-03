@@ -4,21 +4,14 @@ import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
 import com.mipa.common.bookmarkdto.BookmarkInfoListDTO;
 import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
 import com.mipa.common.utils.CopyProperties;
-import com.mipa.convert.BookEntityConvert;
-import com.mipa.convert.BookmarkEntityConvert;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.ChapterMapper;
 import com.mipa.mapper.ReaderBookmarkMapper;
 import com.mipa.mapper.UserMapper;
 import com.mipa.model.*;
-import com.mipa.repository.BookRepository;
-import com.mipa.repository.BookmarkRepository;
-import com.mipa.repository.ChapterRepository;
-import com.mipa.repository.UserRepository;
 import com.mipa.service.api.IBookmarkService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -95,10 +88,10 @@ public class BookmarkService implements IBookmarkService {
 
     }
 
-    @Override
-    public Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize) {
-        return null;
-    }
+//    @Override
+//    public Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize) {
+//        return null;
+//    }
 
     @Override
     public BookmarkInfoDTO getBookmark(String userId, String bookId, String chapterId) {

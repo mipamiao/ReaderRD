@@ -2,7 +2,7 @@ package com.mipa.service.api;
 
 import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
 import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
-import org.springframework.data.domain.Page;
+
 
 import java.util.List;
 
@@ -16,7 +16,7 @@ public interface IBookmarkService {
 
     List<BookmarkInfoDTO> listAllBookmark(String userId, String bookId);
 
-    Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize);
+    //Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize);
 
     BookmarkInfoDTO getBookmark(String userId, String bookId, String chapterId);
 }

@@ -3,8 +3,6 @@ package com.mipa.service;
 import com.mipa.auth.Security.UserSecurity;
 import com.mipa.mapper.UserMapper;
 import com.mipa.model.User;
-import com.mipa.model.UserEntity;
-import com.mipa.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;

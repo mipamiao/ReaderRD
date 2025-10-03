@@ -8,14 +8,10 @@ import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookWithAuthorVO;
 import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 import com.mipa.common.vo.BookWithTagsVO;
-import com.mipa.convert.BookEntityConvert;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.BookTagMapper;
-import com.mipa.repository.BookRepository;
 import com.mipa.service.api.ISearchService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;

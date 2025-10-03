@@ -8,8 +8,6 @@ import com.mipa.common.chapterdto.ChapterInfoDTO;
 import com.mipa.common.chapterdto.ChapterRequestDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
-import com.mipa.convert.BookEntityConvert;
-import com.mipa.convert.ChapterEntityConvert;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.ChapterMapper;
 import com.mipa.mapper.UserMapper;
@@ -21,11 +19,10 @@ import java.util.List;
 import java.util.Objects;
 
 import com.mipa.utils.IdUtil;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 //todo save到update的转变
 @Service
 public class ChapterService implements IChapterService {

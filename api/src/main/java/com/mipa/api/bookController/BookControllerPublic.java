@@ -6,12 +6,10 @@ import com.mipa.common.bookdto.BookListResponseDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
-import com.mipa.repository.BookRepository;
 import com.mipa.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
 
 
 @RestController

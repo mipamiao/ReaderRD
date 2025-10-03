@@ -7,14 +7,12 @@ import com.mipa.common.librarydto.LibraryRequestDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookShelfVO;
-import com.mipa.convert.LibraryEntityConvert;
 import com.mipa.mapper.*;
 import com.mipa.model.*;
 import com.mipa.service.api.IBookShelfService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

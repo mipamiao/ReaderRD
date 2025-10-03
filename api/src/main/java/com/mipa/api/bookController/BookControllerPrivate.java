@@ -4,7 +4,6 @@ import com.mipa.auth.Security.UserSecurity;
 import com.mipa.common.bookdto.BookListResponseDTO;
 import com.mipa.common.bookdto.BookRequestDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.repository.BookRepository;
 import com.mipa.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

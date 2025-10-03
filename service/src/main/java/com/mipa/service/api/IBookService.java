@@ -7,7 +7,7 @@ import java.util.Optional;
 
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
-import org.springframework.data.domain.Page;
+
 
 public interface IBookService {
 

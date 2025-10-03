@@ -9,8 +9,7 @@ import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookWithAuthorVO;
 import com.mipa.common.vo.BookWithTagsVO;
-import com.mipa.convert.BookEntityConvert;
-import com.mipa.convert.UserEntityConvert;
+
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.BookTagMapper;
 import com.mipa.mapper.TagMapper;
@@ -18,13 +17,11 @@ import com.mipa.mapper.UserMapper;
 import com.mipa.model.*;
 import com.mipa.service.api.IBookService;
 import com.mipa.utils.IdUtil;
-import jakarta.transaction.Transactional;
+
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.mipa.common.vo.BookWithTagAndAuthorNameVO;

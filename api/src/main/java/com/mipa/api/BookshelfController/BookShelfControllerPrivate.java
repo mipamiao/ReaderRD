@@ -7,7 +7,6 @@ import com.mipa.common.librarydto.LibraryRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.vo.BookShelfVO;
 import com.mipa.service.BookShelfService;
-import com.mipa.service.LibraryService;
 import com.mipa.service.api.IBookShelfService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
