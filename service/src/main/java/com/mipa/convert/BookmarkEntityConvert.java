@@ -12,7 +12,7 @@ public class BookmarkEntityConvert {
         entity.setChapterId(dto.getChapterId());
         entity.setChapterTitle(dto.getChapterTitle());
         entity.setNote(dto.getNote());
-        entity.setOrder(dto.getOrder());
+        entity.setOrder(dto.getChapterOrder());
         return entity;
     }
 
@@ -23,7 +23,7 @@ public class BookmarkEntityConvert {
         dto.setBookId(entity.getBookId());
         dto.setChapterId(entity.getChapterId());
         dto.setChapterTitle(entity.getChapterTitle());
-        dto.setOrder(entity.getOrder());
+        dto.setChapterOrder(entity.getOrder());
         dto.setCreatedAt(entity.getCreateTime());
         dto.setUpdatedAt(entity.getUpdateTime());
         return dto;

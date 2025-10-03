@@ -10,7 +10,7 @@ public class BookmarkInfoDTO {
     private String bookId;
     private String chapterId;
     private String chapterTitle;
-    private Integer order;
+    private Integer chapterOrder;
     private String note;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

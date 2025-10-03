@@ -1,7 +1,6 @@
 package com.mipa.mapper;
 
 import com.mipa.model.ReaderBookShelf;
-import com.mipa.model.ReaderBookmall;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 

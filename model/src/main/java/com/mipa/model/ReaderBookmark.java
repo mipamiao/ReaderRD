@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReaderBookmall {
+public class ReaderBookmark {
     private String id;
     private String userId;
     private String bookId;

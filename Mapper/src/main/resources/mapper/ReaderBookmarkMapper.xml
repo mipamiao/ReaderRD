@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.ReaderBookmarkMapper">
+
+    <resultMap id="ReaderBookmarkResultMap" type="com.mipa.model.ReaderBookmark">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="note" column="note"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ReaderBookmarkResultMap" parameterType="String">
+        SELECT * FROM reader_bookmark WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ReaderBookmarkResultMap">
+        SELECT * FROM reader_bookmark
+    </select>
+
+    <select id="selectByUserIdAndBookIdAndChapterId" resultMap="ReaderBookmarkResultMap" parameterType="map">
+        SELECT * FROM reader_bookmark
+        WHERE user_id = #{userId} AND book_id = #{bookId} AND chapter_id = #{chapterId}
+    </select>
+    <select id="selectByUserIdAndBookId" resultMap="ReaderBookmarkResultMap" parameterType="map">
+        SELECT * FROM reader_bookmark
+        WHERE user_id = #{userId} AND book_id = #{bookId}
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.ReaderBookmark">
+        INSERT INTO reader_bookmark (id, user_id, book_id, chapter_id, note, chapter_order)
+        VALUES (#{id}, #{userId}, #{bookId}, #{chapterId}, #{note}, #{chapterOrder})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.ReaderBookmark">
+        UPDATE reader_bookmark
+        SET user_id = #{userId},
+        book_id = #{bookId},
+        chapter_id = #{chapterId},
+        note = #{note},
+        chapter_order = #{chapterOrder}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM reader_bookmark WHERE id = #{id}
+    </delete>
+
+</mapper>
