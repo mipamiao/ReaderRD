@@ -7,7 +7,7 @@ import java.util.List;
 @Data
 public class ChapterInfoListDTO {
     List<ChapterInfoDTO> chapters;
-    Integer total;
+    Long total;
     Integer pageNumber;
     Integer pageSize;
 }

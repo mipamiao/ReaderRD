@@ -141,5 +141,11 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateUpdatedAtById" parameterType="String">
+        UPDATE book
+        SET updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
 
 </mapper>

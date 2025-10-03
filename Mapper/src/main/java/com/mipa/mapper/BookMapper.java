@@ -6,6 +6,7 @@ import com.mipa.model.Book;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +39,7 @@ public interface BookMapper {
 
     int updateCoverUrl(@Param("id")String id, @Param("coverUrl") String coverUrl);
 
-    int updateChapterCount(@Param("id") String id, @Param("chapterCount") String chapterCount);
+    int updateChapterCount(@Param("id") String id, @Param("chapterCount") Integer chapterCount);
 
+    int updateUpdatedAtById(@Param("id") String id);
 }

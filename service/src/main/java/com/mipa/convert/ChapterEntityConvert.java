@@ -8,9 +8,9 @@ import com.mipa.model.ChapterEntity;
 public class ChapterEntityConvert {
     public static ChapterEntity fromChapterRequestDTO(ChapterRequestDTO dto) {
         ChapterEntity entity = new ChapterEntity();
-        entity.setTitle(dto.getTitle());
+        entity.setTitle(dto.getName());
         entity.setContent(dto.getContent());
-        entity.setOrder(dto.getOrder());
+        entity.setOrder(dto.getChapterOrder());
         return entity;
     }
 
@@ -19,8 +19,8 @@ public class ChapterEntityConvert {
         dto.setAuthorId(entity.getBook().getAuthor().getUserId());
         dto.setBookId(entity.getBook().getBookId());
         dto.setChapterId(entity.getChapterId());
-        dto.setTitle(entity.getTitle());
-        dto.setOrder(entity.getOrder());
+        dto.setName(entity.getTitle());
+        dto.setChapterOrder(entity.getOrder());
         dto.setCreatedAt(entity.getCreatedAt());
         dto.setUpdatedAt(entity.getUpdatedAt());
         return dto;

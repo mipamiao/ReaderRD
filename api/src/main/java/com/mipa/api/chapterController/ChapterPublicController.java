@@ -33,7 +33,7 @@ public class ChapterPublicController {
     @GetMapping(path = "get-by-order")
     public ApiResponse<ChapterInfoAndContentDTO> getChapterByOrder(
             @RequestParam(name = "bookId") String bookId,
-            @RequestParam(name = "order") Integer order
+            @RequestParam(name = "chapterOrder") Integer order
     ) {
         var result = chapterService.getChapterInfoAndContent(bookId, order);
         if (result != null) return ApiResponse.success(result);
@@ -49,9 +49,10 @@ public class ChapterPublicController {
     ) {
         var page = chapterService.listChapters(bookId, pageNumber,pageSize);
         ChapterInfoListDTO dto = new ChapterInfoListDTO();
-        dto.setChapters(page.getContent());
-        dto.setTotal((int) page.getTotalElements());
+        dto.setChapters(page.datas());
+        dto.setTotal(page.total());
         dto.setPageNumber(pageNumber);
+        dto.setPageSize(page.pageSize());
         return ApiResponse.success(dto);
     }
 

@@ -15,30 +15,77 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
+    <resultMap id="ChapterInfoResultMap" type="com.mipa.model.Chapter">
+        <id property="id" column="id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="name" column="name"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <sql id="ChapterInfoBaseSelect" >
+        SELECT id, book_id, name, chapter_order, created_at, updated_at
+        FROM chapter
+    </sql>
+
+    <sql id="ChapterBaseSelect" >
+        SELECT id, book_id, name, content, chapter_order, created_at, updated_at
+        FROM chapter
+    </sql>
+
+    <sql id="OrderBy">
+        <if test="orderBy != null and orderDirection != null">
+            ORDER BY ${orderBy.column} ${orderDirection.column}
+        </if>
+    </sql>
+
     <select id="selectById" resultMap="ChapterResultMap" parameterType="String">
-        SELECT * FROM chapters WHERE id = #{id}
+        SELECT * FROM chapter WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="ChapterResultMap">
-        SELECT * FROM chapters
+        SELECT * FROM chapter
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.Chapter">
-        INSERT INTO chapters (id, book_id, name, content, chapter_order)
+        INSERT INTO chapter (id, book_id, name, content, chapter_order)
         VALUES (#{id}, #{bookId}, #{name}, #{content}, #{chapterOrder})
     </insert>
 
     <update id="update" parameterType="com.mipa.model.Chapter">
-        UPDATE chapters
+        UPDATE chapter
         SET book_id = #{bookId},
         name = #{name},
         content = #{content},
-        chapter_order = #{chapterOrder},
+        chapter_order = #{chapterOrder}
         WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="String">
-        DELETE FROM chapters WHERE id = #{id}
+        DELETE FROM chapter WHERE id = #{id}
     </delete>
+
+    <select id="selectInfoAllByBookId" parameterType="String" resultMap="ChapterInfoResultMap">
+        <include refid="ChapterInfoBaseSelect"/>
+        WHERE book_id = #{bookId}
+        <include refid="OrderBy"/>
+    </select>
+
+    <select id="selectInfoByBookIdAndOrder" resultMap="ChapterInfoResultMap" parameterType="map">
+        <include refid="ChapterInfoBaseSelect"/>
+        WHERE book_id = #{bookId} AND chapter_order = #{chapterOrder}
+    </select>
+
+    <select id="selectInfoById" resultMap="ChapterInfoResultMap" parameterType="map">
+        <include refid="ChapterInfoBaseSelect"/>
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectByBookIdAndOrder" resultMap="ChapterResultMap" parameterType="map">
+        <include refid="ChapterBaseSelect"/>
+        WHERE book_id = #{bookId} AND chapter_order = #{chapterOrder}
+    </select>
+
 
 </mapper>

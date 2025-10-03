@@ -9,8 +9,8 @@ public class ChapterInfoDTO {
     private String authorId;
     private String bookId;
     private String chapterId;
-    private String title;
-    private Integer order;
+    private String name;
+    private Integer chapterOrder;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

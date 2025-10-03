@@ -1,22 +1,26 @@
 package com.mipa.service;
 
+import com.github.pagehelper.PageHelper;
+import com.github.pagehelper.PageInfo;
+import com.mipa.common.Enum.OrderEnum;
 import com.mipa.common.chapterdto.ChapterInfoAndContentDTO;
 import com.mipa.common.chapterdto.ChapterInfoDTO;
 import com.mipa.common.chapterdto.ChapterRequestDTO;
+import com.mipa.common.utils.CopyProperties;
+import com.mipa.common.utils.PageRecord;
 import com.mipa.convert.BookEntityConvert;
 import com.mipa.convert.ChapterEntityConvert;
-import com.mipa.model.BookEntity;
-import com.mipa.model.ChapterEntity;
-import com.mipa.model.UserEntity;
-import com.mipa.repository.BookRepository;
-import com.mipa.repository.ChapterRepository;
-import com.mipa.repository.UserRepository;
+import com.mipa.mapper.BookMapper;
+import com.mipa.mapper.ChapterMapper;
+import com.mipa.mapper.UserMapper;
+import com.mipa.model.*;
 import com.mipa.service.api.IChapterService;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+import com.mipa.utils.IdUtil;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,27 +31,29 @@ import org.springframework.stereotype.Service;
 public class ChapterService implements IChapterService {
 
     @Autowired
-    private ChapterRepository chapterRepo;
+    private ChapterMapper chapterMapper;
 
     @Autowired
-    private UserRepository userRepo;
+    private UserMapper userMapper;
 
     @Autowired
-    private BookRepository bookRepo;
+    private BookMapper bookMapper;
 
     @Transactional
     public ChapterInfoDTO addChapter(ChapterRequestDTO dto) {
         var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), null);
         if (resultData.result) {
-            var res = chapterRepo.findChapterByBookAndOrder(resultData.book, dto.getOrder());
-            if (res.isPresent()) return null;
-            var chapterEntity = ChapterEntityConvert.fromChapterRequestDTO(dto);
-            chapterEntity.setCreatedAt(LocalDateTime.now());
-            chapterEntity.setUpdatedAt(LocalDateTime.now());
-            chapterEntity.setBook(resultData.book);
-            bookRepo.updateChapterCount(resultData.book.getBookId(), resultData.book.getChaptersCount() + 1, LocalDateTime.now());
-            var result = chapterRepo.save(chapterEntity);
-            return ChapterEntityConvert.toChapterInfoDTO(result);
+            var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(dto.getBookId(), dto.getChapterOrder());
+            if (chapterOpt.isPresent()) return null;
+            bookMapper.updateChapterCount(resultData.book.getId(), resultData.book.getChapterCount() + 1);
+            var chapter = CopyProperties.run(dto, Chapter.class);
+            chapter.setId(IdUtil.uuid());
+            chapterMapper.insert(chapter);
+            var result = chapterMapper.selectInfoById(chapter.getId());
+            var chapterInfoDto = CopyProperties.run(result.get(), ChapterInfoDTO.class);
+            chapterInfoDto.setChapterId(chapter.getId());
+            chapterInfoDto.setAuthorId(dto.getAuthorId());
+            return chapterInfoDto;
         }
         return null;
     }
@@ -56,12 +62,12 @@ public class ChapterService implements IChapterService {
         var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), chapterId);
         if (resultData.result) {
             var chapter = resultData.chapter;
-            chapter.setTitle(dto.getTitle());
+            chapter.setName(dto.getName());
             chapter.setContent(dto.getContent());
-            chapter.setOrder(dto.getOrder());
+            chapter.setChapterOrder(dto.getChapterOrder());
             chapter.setUpdatedAt(LocalDateTime.now());
-            chapterRepo.save(chapter);
-            bookRepo.updatedAt(resultData.book.getBookId(), LocalDateTime.now());
+            chapterMapper.update(chapter);
+            bookMapper.updateUpdatedAtById(resultData.book.getId());
             return true;
         }
         return false;
@@ -72,9 +78,9 @@ public class ChapterService implements IChapterService {
         var resultData = checkBookIdAndAuthorId(bookId, authorId, chapterId);
         if (resultData.result) {
             var chapter = resultData.chapter;
-            if (Objects.equals(chapter.getBook().getBookId(), bookId) && resultData.book.getChaptersCount() > 0) {
-                bookRepo.updateChapterCount(resultData.book.getBookId(), resultData.book.getChaptersCount() - 1, LocalDateTime.now());
-                chapterRepo.delete(chapter);
+            if (Objects.equals(chapter.getBookId(), bookId) && resultData.book.getChapterCount() > 0) {
+                bookMapper.updateChapterCount(resultData.book.getId(), resultData.book.getChapterCount() - 1);
+                chapterMapper.delete(chapterId);
                 return true;
             }
         }
@@ -82,45 +88,67 @@ public class ChapterService implements IChapterService {
     }
 
     public ChapterInfoDTO getChapterInfo(String bookId, String chapterId) {
-        var chapterOpt = chapterRepo.findById(chapterId);
+        var chapterOpt = chapterMapper.selectInfoById(chapterId);
         if (chapterOpt.isPresent()) {
             var chapter = chapterOpt.get();
-            if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
-                return ChapterEntityConvert.toChapterInfoDTO(chapter);
+            if (Objects.equals(chapter.getBookId(), bookId)) {
+                var chapterInfoDto = CopyProperties.run(chapter, ChapterInfoDTO.class);
+                chapterInfoDto.setChapterId(chapter.getId());
+                return chapterInfoDto;
             }
         }
         return null;
     }
 
-    public Page<ChapterInfoDTO> listChapters(String bookId, Integer pageNum, Integer pageSize) {
-        var pageable = PageRequest.of(pageNum, pageSize);
-        var chapters = chapterRepo.findByBookOrderByOrderDesc(BookEntityConvert.specifyBookId(bookId), pageable);
-        return chapters.map(ChapterEntityConvert::toChapterInfoDTO);
+    public PageRecord<ChapterInfoDTO> listChapters(String bookId, Integer pageNum, Integer pageSize) {
+        PageHelper.startPage(pageNum, pageSize);
+        var chapters = chapterMapper.selectInfoAllByBookId(bookId, OrderEnum.CHAPTER_ORDER, OrderEnum.DESC);
+        var pageInfo = new PageInfo<>(chapters);
+        var infos = pageInfo.getList().stream().map(chapter->{
+            var chapterInfoDto = CopyProperties.run(chapter, ChapterInfoDTO.class);
+            chapterInfoDto.setChapterId(chapter.getId());
+            return chapterInfoDto;
+        }).toList();
+        return PageRecord.of(infos, pageInfo);
     }
 
     public List<ChapterInfoDTO> listAllChapters(String bookId) {
-        var chapters = chapterRepo.findAllByBookOrderByOrderDesc(BookEntityConvert.specifyBookId(bookId));
-        return chapters.stream().map(ChapterEntityConvert::toChapterInfoDTO).toList();
+        var chapters = chapterMapper.selectInfoAllByBookId(bookId, OrderEnum.CHAPTER_ORDER, OrderEnum.DESC);
+        var pageInfo = new PageInfo<>(chapters);
+        var infos = pageInfo.getList().stream().map(chapter->{
+            var chapterInfoDto = CopyProperties.run(chapter, ChapterInfoDTO.class);
+            chapterInfoDto.setChapterId(chapter.getId());
+            return chapterInfoDto;
+        }).toList();
+        return infos;
     }
 
     //todo 这里content要是很大的话，可能会有性能问题
     public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, String chapterId) {
-        var chapterOpt = chapterRepo.findById(chapterId);
-        if (chapterOpt.isPresent()) {
+        var chapterOpt = chapterMapper.selectById(chapterId);
+        if(chapterOpt.isPresent()){
             var chapter = chapterOpt.get();
-            if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
-                return ChapterEntityConvert.toChapterInfoAndContentDTO(chapter);
+            if(Objects.equals(chapter.getBookId(), bookId)){
+                var chapterInfoAndContentDto = new ChapterInfoAndContentDTO();
+                chapterInfoAndContentDto.setChapterInfoDTO(CopyProperties.run(chapter, ChapterInfoDTO.class));
+                chapterInfoAndContentDto.getChapterInfoDTO().setChapterId(chapter.getId());
+                chapterInfoAndContentDto.setContent(chapter.getContent());
+                return chapterInfoAndContentDto;
             }
         }
         return null;
     }
 
     public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, Integer order){
-        var chapterOpt = chapterRepo.findChapterByBookAndOrder(BookEntityConvert.specifyBookId(bookId), order);
+        var chapterOpt = chapterMapper.selectByBookIdAndOrder(bookId, order);
         if(chapterOpt.isPresent()){
             var chapter = chapterOpt.get();
-            if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
-                return ChapterEntityConvert.toChapterInfoAndContentDTO(chapter);
+            if (Objects.equals(chapter.getBookId(), bookId)) {
+                var chapterInfoAndContentDto = new ChapterInfoAndContentDTO();
+                chapterInfoAndContentDto.setChapterInfoDTO(CopyProperties.run(chapter, ChapterInfoDTO.class));
+                chapterInfoAndContentDto.getChapterInfoDTO().setChapterId(chapter.getId());
+                chapterInfoAndContentDto.setContent(chapter.getContent());
+                return chapterInfoAndContentDto;
             }
         }
         return null;
@@ -129,29 +157,30 @@ public class ChapterService implements IChapterService {
     //todo 这里因为jpa是懒加载，所以会有n+1问题，后续可以优化
     //这个函数用来确保书是作者的，并且章节是书的
     private ResultData checkBookIdAndAuthorId(String bookId, String authorId, String chapterId) {
-        var userOpt = userRepo.findById(authorId);
+        var userOpt = userMapper.selectById(authorId);
         if (userOpt.isPresent()) {
             var user = userOpt.get();
-            var bookOpt = bookRepo.findById(bookId);
+            var bookOpt = bookMapper.selectById(bookId);
             if (bookOpt.isPresent()) {
                 var book = bookOpt.get();
-                if (Objects.equals(book.getAuthor().getUserId(), user.getUserId())) {
+                if (Objects.equals(book.getAuthorId(), user.getId())) {
                     if (chapterId != null) {
-                        var chapterOpt = chapterRepo.findById(chapterId);
+                        var chapterOpt = chapterMapper.selectById(chapterId);
                         if (chapterOpt.isPresent()) {
                             var chapter = chapterOpt.get();
-                            if (Objects.equals(chapter.getBook().getBookId(), bookId)) {
+                            if (Objects.equals(chapter.getBookId(), bookId)) {
                                 return new ResultData(true, user, book, chapter);
                             }
                         }
+                    }else {
+                        return new ResultData(true, user, book, null);
                     }
-                    return new ResultData(true, user, book, null);
                 }
             }
         }
         return new ResultData(false, null, null, null);
     }
 
-    record ResultData(Boolean result, UserEntity user, BookEntity book, ChapterEntity chapter){}
+    record ResultData(Boolean result, User user, Book book, Chapter chapter){}
 
 }
