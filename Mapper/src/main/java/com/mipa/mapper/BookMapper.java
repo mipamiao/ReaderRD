@@ -39,6 +39,8 @@ public interface BookMapper {
 
     List<BookWithAuthorVO> selectAllBookAndAuthorByAuthorId(@Param("authorId") String authorId);
 
+    List<BookWithAuthorVO> selectAllBookAndAuthorByKeyword(@Param("keyword") String keyword);
+
     int updateCoverUrl(@Param("id")String id, @Param("coverUrl") String coverUrl);
 
     int updateChapterCount(@Param("id") String id, @Param("chapterCount") Integer chapterCount);

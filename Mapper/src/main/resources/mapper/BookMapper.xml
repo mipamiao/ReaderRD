@@ -116,6 +116,8 @@
 
     <select id="selectAllBookAndAuthorByKeyword" resultMap="BookAndAuthorResultMap" parameterType="String">
         <include refid="BookAndAuthorBaseSelect"/>
+        LEFT JOIN book_tag bt ON b.id = bt.book_id
+        LEFT JOIN tag t ON t.id = bt.tag_id
         WHERE b.name LIKE #{keyword} OR b.description LIKE #{keyword} OR b.category LIKE #{keyword} OR t.name LIKE #{keyword}
     </select>
 
