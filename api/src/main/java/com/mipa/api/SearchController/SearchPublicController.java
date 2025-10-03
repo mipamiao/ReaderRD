@@ -27,10 +27,10 @@ public class SearchPublicController {
             @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize) {
         var booksPage = searchService.searchBooks(keyword, pageNumber, pageSize);
         var dto = new BookListResponseDTO();
-        dto.setBooks(booksPage.getContent());
+        ///dto.setBooks(booksPage.getContent());
         dto.setPageSize(booksPage.getSize());
         dto.setPageNumber(booksPage.getNumber());
-        dto.setTotal((int) booksPage.getTotalElements());
+        dto.setTotal(booksPage.getTotalElements());
         return ApiResponse.success(dto);
     }
 }

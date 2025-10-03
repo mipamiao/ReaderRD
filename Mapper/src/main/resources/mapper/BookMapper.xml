@@ -16,15 +16,47 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
+    <resultMap id="BookAndAuthorResultMap" type="com.mipa.common.vo.BookWithAuthorVO">
+        <id property="id" column="book_id"/>
+        <result property="name" column="book_name"/>
+        <result property="description" column="description"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="category" column="category"/>
+        <result property="chapterCount" column="chapter_count"/>
+        <result property="authorName" column="author_name"/>
+        <result property="authorId" column="author_id"/>
+        <result property="createdAt" column="book_created_at"/>
+        <result property="updatedAt" column="book_updated_at"/>
+    </resultMap>
+
+    <sql id="BookAndAuthorBaseSelect">
+        SELECT DISTINCT
+            b.id as book_id,
+            b.name as book_name,
+            b.description,
+            b.cover_url,
+            b.category,
+            b.chapter_count,
+            u.name as author_name,
+            u.id as author_id,
+            b.created_at as book_created_at,
+            b.updated_at as book_updated_at
+        FROM
+        book b
+        LEFT JOIN user u ON b.author_id = u.id
+    </sql>
+
+
+
     <select id="selectById" resultMap="BookResultMap" parameterType="String">
         SELECT * FROM book WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="BookResultMap" parameterType="map">
         SELECT * FROM book
-        <if test="orderBy != null and orderDirection != null">
-            ORDER BY ${orderBy.column} ${orderDirection.sql}
-        </if>
+<!--        <if test="orderBy != null and orderDirection != null">-->
+<!--            ORDER BY ${orderBy.column} ${orderDirection.sql}-->
+<!--        </if>-->
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.Book">
@@ -57,7 +89,7 @@
     </select>
 
     <select id="selectByKeyword" resultMap="BookResultMap" parameterType="String">
-        SELECT
+        SELECT DISTINCT
             b.id,
             b.name,
             b.description,
@@ -73,6 +105,30 @@
         WHERE b.name LIKE #{keyword} OR b.description LIKE #{keyword} OR b.category LIKE #{keyword} OR t.name LIKE #{keyword}
     </select>
 
+    <select id="selectAllBookAndAuthor" resultMap="BookAndAuthorResultMap">
+        <include refid="BookAndAuthorBaseSelect"/>
+    </select>
+
+    <select id="selectAllBookAndAuthorByCategory" resultMap="BookAndAuthorResultMap" parameterType="String">
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.category  = #{category}
+    </select>
+
+    <select id="selectAllBookAndAuthorByKeyword" resultMap="BookAndAuthorResultMap" parameterType="String">
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.name LIKE #{keyword} OR b.description LIKE #{keyword} OR b.category LIKE #{keyword} OR t.name LIKE #{keyword}
+    </select>
+
+    <select id="selectBookAndAuthorById" resultMap="BookAndAuthorResultMap" >
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="selectAllBookAndAuthorByAuthorId" resultMap="BookAndAuthorResultMap">
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.author_id = #{authorId}
+    </select>
+
     <update id="updateCoverUrl" parameterType="map" >
         UPDATE book
         SET cover_url = #{coverUrl}
@@ -84,5 +140,6 @@
         SET chapter_count = #{chapterCount}
         WHERE id = #{id}
     </update>
+
 
 </mapper>

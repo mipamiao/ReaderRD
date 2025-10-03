@@ -13,26 +13,39 @@
     </resultMap>
 
     <select id="selectById" resultMap="TagResultMap" parameterType="String">
-        SELECT * FROM tags WHERE id = #{id}
+        SELECT * FROM tag WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="TagResultMap">
-        SELECT * FROM tags
+        SELECT * FROM tag
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.Tag">
-        INSERT INTO tags (id, name)
+        INSERT INTO tag (id, name)
         VALUES (#{id}, #{name})
     </insert>
 
     <update id="update" parameterType="com.mipa.model.Tag">
-        UPDATE tags
+        UPDATE tag
         SET name = #{name},
         WHERE id = #{id}
     </update>
 
     <delete id="delete" parameterType="String">
-        DELETE FROM tags WHERE id = #{id}
+        DELETE FROM tag WHERE id = #{id}
     </delete>
+
+    <select id="selectByName" parameterType="String" resultMap="TagResultMap">
+        SELECT * FROM tag WHERE name = #{name}
+    </select>
+
+    <select id="selectByNames" parameterType="list" resultMap="TagResultMap">
+        SELECT *
+        FROM tag
+        WHERE name in
+        <foreach collection="names" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </select>
 
 </mapper>

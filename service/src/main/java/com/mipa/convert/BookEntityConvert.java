@@ -13,13 +13,13 @@ public class BookEntityConvert {
             return null;
         }
         return BookDTO.builder()
-                .bookId(bookEntity.getBookId())
-                .title(bookEntity.getTitle())
+                .id(bookEntity.getBookId())
+                .name(bookEntity.getTitle())
                 .description(bookEntity.getDescription())
-                .coverImage(bookEntity.getCoverImage())
+                .coverUrl(bookEntity.getCoverImage())
                 .category(bookEntity.getCategory())
-                .tags(bookEntity.getTags())
-                .chaptersCount(bookEntity.getChaptersCount())
+                //.tags(bookEntity.getTags())
+                .chapterCount(bookEntity.getChaptersCount())
                 .authorName(bookEntity.getAuthor() != null ? bookEntity.getAuthor().getUserName() : null)
                 .createdAt(bookEntity.getCreatedAt())
                 .updatedAt(bookEntity.getUpdatedAt())
@@ -31,9 +31,9 @@ public class BookEntityConvert {
             return null;
         }
         BookEntity bookEntity = new BookEntity();
-        bookEntity.setTitle(bookRequestDTO.getTitle());
+        bookEntity.setTitle(bookRequestDTO.getName());
         bookEntity.setDescription(bookRequestDTO.getDescription());
-        bookEntity.setCoverImage(bookRequestDTO.getCoverImage());
+        bookEntity.setCoverImage(bookRequestDTO.getCoverUrl());
         bookEntity.setCategory(bookRequestDTO.getCategory());
         bookEntity.setTags(bookRequestDTO.getTags());
         bookEntity.setChaptersCount(0);

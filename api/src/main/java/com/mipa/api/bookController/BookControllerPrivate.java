@@ -62,10 +62,10 @@ public class BookControllerPrivate {
 
         var res = bookService.getBooksByUserId(userSecurity.getUserId(), pageNumber, pageSize);
         BookListResponseDTO dto = new BookListResponseDTO();
-        dto.setBooks(res.getContent());
+        dto.setBooks(res.datas());
         dto.setPageSize(pageSize);
         dto.setPageNumber(pageNumber);
-        dto.setTotal((int) res.getTotalElements());
+        dto.setTotal( res.total());
 
         return ApiResponse.success(dto);
     }

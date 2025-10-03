@@ -1,4 +1,4 @@
-package com.mipa.model;
+package com.mipa.common.vo;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,10 +11,24 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Tag {
+public class BookWithAuthorVO {
     private String id;
+
     private String name;
+
+    private String description;
+
+    private String coverUrl;
+
+    private String category;
+
+    private Integer chapterCount;
+
+    private String authorName;
+
+    private String authorId;
+
     private LocalDateTime createdAt;
+
     private LocalDateTime updatedAt;
 }
-

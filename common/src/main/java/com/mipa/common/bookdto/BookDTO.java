@@ -13,19 +13,18 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class BookDTO {
-    private String bookId;
+    private String id;
 
-    private String title;
+    private String name;
 
     private String description;
 
-    private String coverImage;
+    private String coverUrl;
 
     private String category;
 
-    private List<String> tags;
 
-    private Integer chaptersCount;
+    private Integer chapterCount;
 
     private String authorName; // 通常DTO中只存储作者ID而不是整个作者对象
 

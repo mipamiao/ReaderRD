@@ -1,22 +1,24 @@
 package com.mipa.mapper;
 
-import com.mipa.common.Enum.OrderEnum;
+import com.mipa.common.vo.BookWithAuthorVO;
+import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 import com.mipa.model.Book;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 @Mapper
 public interface BookMapper {
 
-    Book selectById(@Param("id") String id, @Param("orderBy")OrderEnum orderEnum, @Param("orderDirection ") String orderDirection);
+    Optional<Book> selectById(@Param("id") String id);
 
     List<Book> selectAll();
 
-    int insert(Book user);
+    int insert(Book book);
 
-    int update(Book user);
+    int update(Book book);
 
     int delete(@Param("id") String id);
 
@@ -26,7 +28,16 @@ public interface BookMapper {
 
     List<Book> selectByKeyword(@Param("keyword") String keyword);
 
+    Optional<BookWithAuthorVO> selectBookAndAuthorById(@Param("id") String id);
+
+    List<BookWithAuthorVO> selectAllBookAndAuthor();
+
+    List<BookWithAuthorVO> selectAllBookAndAuthorByCategory(@Param("category") String category);
+
+    List<BookWithAuthorVO> selectAllBookAndAuthorByAuthorId(@Param("authorId") String authorId);
+
     int updateCoverUrl(@Param("id")String id, @Param("coverUrl") String coverUrl);
 
     int updateChapterCount(@Param("id") String id, @Param("chapterCount") String chapterCount);
+
 }

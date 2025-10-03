@@ -1,17 +1,21 @@
 package com.mipa.service.api;
 
+import com.github.pagehelper.PageInfo;
 import com.mipa.common.bookdto.BookDTO;
 import com.mipa.common.bookdto.BookRequestDTO;
 import java.util.Optional;
+
+import com.mipa.common.utils.PageRecord;
+import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 import org.springframework.data.domain.Page;
 
 public interface IBookService {
 
-  Page<BookDTO> findByPageable(int pageNumber, int pageSize);
+  PageRecord<BookWithTagAndAuthorNameVO> findByPageable(int pageNumber, int pageSize);
 
-  Page<BookDTO> findByCategory(String category, int pageNumber, int pageSize);
+  PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize);
 
-  Optional<BookDTO> findById(String bookId);
+  Optional<BookWithTagAndAuthorNameVO> findById(String bookId);
 
   Boolean addBook(BookRequestDTO bookRequestDTO, String userId);
 
@@ -19,5 +23,5 @@ public interface IBookService {
 
   Boolean deleteBook(String bookId, String userId);
 
-  Page<BookDTO> getBooksByUserId(String userId, int pageNumber, int pageSize);
+  PageRecord<BookWithTagAndAuthorNameVO> getBooksByUserId(String userId, int pageNumber, int pageSize);
 }

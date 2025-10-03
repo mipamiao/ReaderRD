@@ -12,17 +12,17 @@ import java.util.List;
 public class BookRequestDTO {
 
 
-    private String title;
+    private String name;
 
     private String description;
 
-    private String coverImage;
+    private String coverUrl;
 
     private String category;
 
     private List<String> tags;
 
-    private Integer chaptersCount;
+    private Integer chapterCount;
 
 }
 
