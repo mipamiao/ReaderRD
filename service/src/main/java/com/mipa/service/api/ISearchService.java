@@ -1,8 +1,10 @@
 package com.mipa.service.api;
 
 import com.mipa.common.bookdto.BookDTO;
-import org.springframework.data.domain.Page;
+import com.mipa.common.utils.PageRecord;
+import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
+
 
 public interface ISearchService {
-    Page<BookDTO> searchBooks(String keyword, Integer pageNumber, Integer pageSize);
+    PageRecord<BookWithTagAndAuthorNameVO> searchBooks(String keyword, Integer pageNumber, Integer pageSize);
 }

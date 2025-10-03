@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.WriterBookMapper">
+
+    <resultMap id="WriterBookResultMap" type="com.mipa.model.WriterBook">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="WriterBookResultMap" parameterType="String">
+        SELECT * FROM writer_book WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="WriterBookResultMap">
+        SELECT * FROM writer_book
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.WriterBook">
+        INSERT INTO writer_book (id, user_id, book_id)
+        VALUES (#{id}, #{userId}, #{bookId})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.WriterBook">
+        UPDATE writer_book
+        SET user_id = #{userId},
+        book_id = #{bookId},
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM writer_book WHERE id = #{id}
+    </delete>
+
+</mapper>

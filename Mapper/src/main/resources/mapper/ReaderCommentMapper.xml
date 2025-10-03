@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.ReaderCommentMapper">
+
+    <resultMap id="ReaderCommentResultMap" type="com.mipa.model.ReaderComment">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="message" column="message"/>
+        <result property="replyCommentId" column="reply_comment_id"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ReaderCommentResultMap" parameterType="String">
+        SELECT * FROM reader_comment WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ReaderCommentResultMap">
+        SELECT * FROM reader_comment
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.ReaderComment">
+        INSERT INTO reader_comment (id, user_id, book_id, chapter_id, message, reply_comment_id)
+        VALUES (#{id}, #{userId}, #{bookId}, #{chapterId}, #{message}, #{replyCommentId})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.ReaderComment">
+        UPDATE reader_comment
+        SET user_id = #{userId},
+        book_id = #{bookId},
+        chapter_id = #{chapterId},
+        message = #{message},
+        reply_comment_id = #{replyCommentId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM reader_comment WHERE id = #{id}
+    </delete>
+
+</mapper>

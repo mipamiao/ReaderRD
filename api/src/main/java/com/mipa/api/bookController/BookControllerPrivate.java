@@ -4,7 +4,6 @@ import com.mipa.auth.Security.UserSecurity;
 import com.mipa.common.bookdto.BookListResponseDTO;
 import com.mipa.common.bookdto.BookRequestDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.repository.BookRepository;
 import com.mipa.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -62,10 +61,10 @@ public class BookControllerPrivate {
 
         var res = bookService.getBooksByUserId(userSecurity.getUserId(), pageNumber, pageSize);
         BookListResponseDTO dto = new BookListResponseDTO();
-        dto.setBooks(res.getContent());
+        dto.setBooks(res.datas());
         dto.setPageSize(pageSize);
         dto.setPageNumber(pageNumber);
-        dto.setTotal((int) res.getTotalElements());
+        dto.setTotal( res.total());
 
         return ApiResponse.success(dto);
     }

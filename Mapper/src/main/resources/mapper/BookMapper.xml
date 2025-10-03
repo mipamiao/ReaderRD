@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.BookMapper">
+    <resultMap id="BookResultMap" type="com.mipa.model.Book">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="category" column="category"/>
+        <result property="chapterCount" column="chapter_count"/>
+        <result property="authorId" column="author_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <resultMap id="BookAndAuthorResultMap" type="com.mipa.common.vo.BookWithAuthorVO">
+        <id property="id" column="book_id"/>
+        <result property="name" column="book_name"/>
+        <result property="description" column="description"/>
+        <result property="coverUrl" column="cover_url"/>
+        <result property="category" column="category"/>
+        <result property="chapterCount" column="chapter_count"/>
+        <result property="authorName" column="author_name"/>
+        <result property="authorId" column="author_id"/>
+        <result property="createdAt" column="book_created_at"/>
+        <result property="updatedAt" column="book_updated_at"/>
+    </resultMap>
+
+    <sql id="BookAndAuthorBaseSelect">
+        SELECT DISTINCT
+            b.id as book_id,
+            b.name as book_name,
+            b.description,
+            b.cover_url,
+            b.category,
+            b.chapter_count,
+            u.name as author_name,
+            u.id as author_id,
+            b.created_at as book_created_at,
+            b.updated_at as book_updated_at
+        FROM
+        book b
+        LEFT JOIN user u ON b.author_id = u.id
+    </sql>
+
+
+
+    <select id="selectById" resultMap="BookResultMap" parameterType="String">
+        SELECT * FROM book WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="BookResultMap" parameterType="map">
+        SELECT * FROM book
+<!--        <if test="orderBy != null and orderDirection != null">-->
+<!--            ORDER BY ${orderBy.column} ${orderDirection.sql}-->
+<!--        </if>-->
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.Book">
+        INSERT INTO book (id, name, description, category, chapter_count, cover_url, author_id )
+        VALUES (#{id}, #{name}, #{description}, #{category}, #{chapterCount}, #{coverUrl}, #{authorId})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.Book">
+        UPDATE book
+        SET name = #{name},
+            description = #{description},
+            cover_url = #{coverUrl},
+            category = #{category},
+            chapter_count = #{chapterCount},
+            author_id = #{authorId}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM book WHERE id = #{id}
+    </delete>
+
+
+    <select id="selectByCategory" resultMap="BookResultMap" parameterType="String">
+        SELECT * FROM book WHERE category = #{category}
+    </select>
+
+    <select id="selectByAuthorId" resultMap="BookResultMap" parameterType="String">
+        SELECT * FROM book WHERE author_id = #{authorId}
+    </select>
+
+    <select id="selectByKeyword" resultMap="BookResultMap" parameterType="String">
+        SELECT
+            b.id,
+            b.name,
+            b.description,
+            b.cover_url,
+            b.category,
+            b.chapter_count,
+            b.author_id,
+            b.created_at,
+            b.updated_at
+        FROM book b
+        LEFT JOIN book_tag bt ON b.id = bt.book_id
+        LEFT JOIN tag t ON bt.tag_id = t.id
+        WHERE b.name LIKE #{keyword} OR b.description LIKE #{keyword} OR b.category LIKE #{keyword} OR t.name LIKE #{keyword}
+    </select>
+
+    <select id="selectAllBookAndAuthor" resultMap="BookAndAuthorResultMap">
+        <include refid="BookAndAuthorBaseSelect"/>
+    </select>
+
+    <select id="selectAllBookAndAuthorByCategory" resultMap="BookAndAuthorResultMap" parameterType="String">
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.category  = #{category}
+    </select>
+
+    <select id="selectAllBookAndAuthorByKeyword" resultMap="BookAndAuthorResultMap" parameterType="String">
+        <include refid="BookAndAuthorBaseSelect"/>
+        LEFT JOIN book_tag bt ON b.id = bt.book_id
+        LEFT JOIN tag t ON t.id = bt.tag_id
+        WHERE b.name LIKE #{keyword} OR b.description LIKE #{keyword} OR b.category LIKE #{keyword} OR t.name LIKE #{keyword}
+    </select>
+
+    <select id="selectBookAndAuthorById" resultMap="BookAndAuthorResultMap" >
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.id = #{id}
+    </select>
+
+    <select id="selectAllBookAndAuthorByAuthorId" resultMap="BookAndAuthorResultMap">
+        <include refid="BookAndAuthorBaseSelect"/>
+        WHERE b.author_id = #{authorId}
+    </select>
+
+    <select id="selectAllByIds" resultMap="BookResultMap" parameterType="list">
+        SELECT * FROM book
+        WHERE id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </select>
+
+    <update id="updateCoverUrl" parameterType="map" >
+        UPDATE book
+        SET cover_url = #{coverUrl}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateChapterCount" parameterType="map">
+        UPDATE book
+        SET chapter_count = #{chapterCount}
+        WHERE id = #{id}
+    </update>
+
+    <update id="updateUpdatedAtById" parameterType="String">
+        UPDATE book
+        SET updated_at = NOW()
+        WHERE id = #{id}
+    </update>
+
+
+</mapper>

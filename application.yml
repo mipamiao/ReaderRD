@@ -1,13 +1,13 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/ReaderDB?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
+    url: jdbc:mysql://localhost:3306/New_Reader_DB?useSSL=false&serverTimezone=UTC&characterEncoding=UTF-8
     username: mipa
     password: mipa
     driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
@@ -30,6 +30,15 @@ logging:
         ReaderRD:
           Security:
             JwtAuthenticationFilter: DEBUG
+
+pagehelper:
+  helper-dialect: mysql
+  reasonable: false       # 页码 < 1 自动设置为 1，页码超过总页数自动设置为最后一页
+  support-methods-arguments: true
+  params: count=countSql
+
+mybatis:
+  mapper-locations: classpath*:mapper/*.xml
 
 
 my-settings:

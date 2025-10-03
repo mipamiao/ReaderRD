@@ -12,7 +12,7 @@ import jakarta.validation.constraints.Pattern;
 @AllArgsConstructor
 public class UserRegisterDTO {
     @NotBlank(message = "用户名不能为空")
-    private String userName;
+    private String name;
 
     @NotBlank(message = "邮箱不能为空")
     @Email(regexp = "^[a-zA-Z0-9_.-]+@[a-zA-Z0-9-]+(\\.[a-zA-Z0-9-]+)*\\.[a-zA-Z0-9]{2,}$",

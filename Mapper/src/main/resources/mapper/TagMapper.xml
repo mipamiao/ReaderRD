@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.TagMapper">
+
+    <resultMap id="TagResultMap" type="com.mipa.model.Tag">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="TagResultMap" parameterType="String">
+        SELECT * FROM tag WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="TagResultMap">
+        SELECT * FROM tag
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.Tag">
+        INSERT INTO tag (id, name)
+        VALUES (#{id}, #{name})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.Tag">
+        UPDATE tag
+        SET name = #{name},
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="String">
+        DELETE FROM tag WHERE id = #{id}
+    </delete>
+
+    <select id="selectByName" parameterType="String" resultMap="TagResultMap">
+        SELECT * FROM tag WHERE name = #{name}
+    </select>
+
+    <select id="selectByNames" parameterType="list" resultMap="TagResultMap">
+        SELECT *
+        FROM tag
+        WHERE name in
+        <foreach collection="names" item="name" open="(" separator="," close=")">
+            #{name}
+        </foreach>
+    </select>
+
+</mapper>

@@ -1,13 +1,14 @@
 package com.mipa.common.bookdto;
 
+import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
 public class BookListResponseDTO {
-    List<BookDTO> books;
-    Integer total;
+    List<BookWithTagAndAuthorNameVO> books;
+    Long total;
     Integer pageNumber;
     Integer pageSize;
 }

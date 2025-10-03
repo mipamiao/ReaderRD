@@ -1,8 +1,8 @@
 package com.mipa.service;
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.model.UserEntity;
-import com.mipa.repository.UserRepository;
+import com.mipa.mapper.UserMapper;
+import com.mipa.model.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,16 +15,20 @@ import org.springframework.stereotype.Service;
 public class CustomUserDetailsService implements UserDetailsService {
 
     @Autowired
-    private UserRepository userRepository;
+    private UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        //todo 难看以后改写一下
-        UserEntity user = userRepository.findByUserName(username).get();
-        log.debug(user.toString());
-        if(user == null) return null;
-        UserDetails userSecurity = new UserSecurity(user.getUserName(), user.getPassword(), user.getRole(), user.getUserId());
-        userSecurity.getAuthorities().forEach(a -> System.out.println(a.getAuthority()));
-        return userSecurity;
+        return userMapper.selectByName(username)
+                .map(user -> {
+                    log.debug("Loaded user: {}", user);
+                    return new UserSecurity(
+                            user.getName(),
+                            user.getPassword(),
+                            user.getRole(),
+                            user.getId()
+                    );
+                })
+                .orElseThrow(() -> new UsernameNotFoundException("用户不存在: " + username));
     }
 }

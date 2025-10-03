@@ -3,6 +3,7 @@ package com.mipa.api.SearchController;
 import com.mipa.common.bookdto.BookDTO;
 import com.mipa.common.bookdto.BookListResponseDTO;
 import com.mipa.common.response.ApiResponse;
+import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 import com.mipa.service.SearchService;
 import com.mipa.service.api.ISearchService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,10 +28,10 @@ public class SearchPublicController {
             @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize) {
         var booksPage = searchService.searchBooks(keyword, pageNumber, pageSize);
         var dto = new BookListResponseDTO();
-        dto.setBooks(booksPage.getContent());
-        dto.setPageSize(booksPage.getSize());
-        dto.setPageNumber(booksPage.getNumber());
-        dto.setTotal((int) booksPage.getTotalElements());
+        dto.setBooks(booksPage.datas());
+        dto.setPageSize(booksPage.pageSize());
+        dto.setPageNumber(booksPage.pageNum());
+        dto.setTotal(booksPage.total());
         return ApiResponse.success(dto);
     }
 }

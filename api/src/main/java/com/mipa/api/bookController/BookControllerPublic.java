@@ -1,14 +1,15 @@
 package com.mipa.api.bookController;
 
+import com.github.pagehelper.PageInfo;
 import com.mipa.common.bookdto.BookDTO;
 import com.mipa.common.bookdto.BookListResponseDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.repository.BookRepository;
+import com.mipa.common.utils.PageRecord;
+import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 import com.mipa.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.data.domain.Page;
 
 
 @RestController
@@ -24,22 +25,22 @@ public class BookControllerPublic {
             @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize,
             @RequestParam(required = false) String category
     ) {
-        Page<BookDTO> page = null;
+        PageRecord<BookWithTagAndAuthorNameVO> page = null;
 
         if (category== null)
             page = bookService.findByPageable(pageNumber, pageSize);
         else page = bookService.findByCategory(category, pageNumber, pageSize);
 
         BookListResponseDTO responseDTO = new BookListResponseDTO();
-        responseDTO.setBooks(page.getContent());
-        responseDTO.setTotal((int) page.getTotalElements());
+        responseDTO.setBooks(page.datas());
+        responseDTO.setTotal(page.total());
         responseDTO.setPageNumber(pageNumber);
         responseDTO.setPageSize(pageSize);
         return ApiResponse.success(responseDTO);
     }
 
     @GetMapping(path = "/get")
-    public ApiResponse<BookDTO> getBookById(
+    public ApiResponse<BookWithTagAndAuthorNameVO> getBookById(
             @RequestParam(required = true) String bookId
     ) {
         var bookOpt = bookService.findById(bookId);
