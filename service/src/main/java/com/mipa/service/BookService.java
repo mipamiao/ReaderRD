@@ -54,6 +54,8 @@ public class BookService implements IBookService {
     @Autowired
     MyConfiguration config;
 
+    @Transactional(readOnly = true)
+    @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByPageable(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthor();
@@ -63,6 +65,8 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthorByCategory(category);
@@ -72,6 +76,8 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public Optional<BookWithTagAndAuthorNameVO> findById(String bookId) {
         var bookWithAuthor = bookMapper.selectBookAndAuthorById(bookId);
         if (bookWithAuthor.isPresent()) {
@@ -83,7 +89,8 @@ public class BookService implements IBookService {
         return Optional.empty();
     }
 
-
+    @Transactional
+    @Override
     public Boolean addBook(BookRequestDTO bookRequestDTO, String userId) {
         var userOpt = userMapper.selectById(userId) ;
         if(userOpt.isPresent()){
@@ -99,6 +106,8 @@ public class BookService implements IBookService {
         return false;
     }
 
+    @Transactional
+    @Override
     public Boolean updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId) {
         var userOpt = userMapper.selectById(userId) ;
         if(userOpt.isPresent()){
@@ -124,6 +133,8 @@ public class BookService implements IBookService {
         return false;
     }
 
+    @Transactional
+    @Override
     public Boolean deleteBook(String bookId, String userId) {
         var userOpt = userMapper.selectById(userId);
         if (userOpt.isPresent()) {
@@ -142,6 +153,8 @@ public class BookService implements IBookService {
         return false;
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public PageRecord<BookWithTagAndAuthorNameVO> getBooksByUserId(String userId, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthorByAuthorId(userId);
@@ -151,8 +164,9 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
-    //todo 事务失败的回滚
+
     @Transactional
+    @Override
     public String updateCoverImage(MultipartFile file, String bookId, String userId) {
         if (file.isEmpty()) return null;
 

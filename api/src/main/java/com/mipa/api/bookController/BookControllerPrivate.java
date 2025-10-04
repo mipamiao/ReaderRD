@@ -5,6 +5,7 @@ import com.mipa.common.dto.bookdto.BookListResponseDTO;
 import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.service.BookService;
+import com.mipa.service.api.IBookService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequestMapping(path = "/api/private/book", produces = "application/json")
 public class BookControllerPrivate {
     @Autowired
-    BookService bookService;
+    IBookService bookService;
 
     @PreAuthorize("hasRole('WRITER")
     @PostMapping(path = "/add", consumes = "application/json")

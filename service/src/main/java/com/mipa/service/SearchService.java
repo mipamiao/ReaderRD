@@ -12,6 +12,7 @@ import com.mipa.mapper.BookTagMapper;
 import com.mipa.service.api.ISearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +28,7 @@ public class SearchService implements ISearchService {
     @Autowired
     BookTagMapper bookTagMapper;
 
+    @Transactional(readOnly = true)
     @Override
     public PageRecord<BookWithTagAndAuthorNameVO> searchBooks(String keyword, Integer pageNumber, Integer pageSize) {
         PageHelper.startPage(pageNumber, pageSize);

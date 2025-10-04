@@ -14,6 +14,7 @@ import com.mipa.utils.IdUtil;
 import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class CommentService implements ICommentService {
@@ -24,6 +25,9 @@ public class CommentService implements ICommentService {
     @Autowired
     ChapterMapper chapterMapper;
 
+
+    @Transactional
+    @Override
     public CommentAndUserInfoVO addComment(CommentDTO dto, String userId){
         var vr = VerifyRelationShip.start().verifyBookAndChapter(dto.getBookId(), dto.getChapterId(), chapterMapper);
         if(vr.isSucceed()){
@@ -36,6 +40,9 @@ public class CommentService implements ICommentService {
         return null;
     }
 
+
+    @Transactional
+    @Override
     public boolean delComment(String userId, String commentId){
         var vr =  VerifyRelationShip.start().verifyCommentAndUserId(userId, commentId, commentMapper);
         if (vr.isSucceed()) {
@@ -45,6 +52,7 @@ public class CommentService implements ICommentService {
         return false;
     }
 
+    @Override
     public PageRecord<CommentAndUserInfoVO> listComment(String bookId, String chapterId, Integer pageNumber, Integer pageSize) {
         var vr = VerifyRelationShip.start().verifyBookAndChapter(bookId, chapterId, chapterMapper);
         if (vr.isSucceed()) {

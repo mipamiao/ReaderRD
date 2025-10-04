@@ -34,6 +34,7 @@ public class UserService implements IUserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Transactional
     @Override
     public boolean save(UserRegisterDTO userRegisterDTO) {
         var user = new User();

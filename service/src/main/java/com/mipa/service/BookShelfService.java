@@ -13,6 +13,7 @@ import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +32,8 @@ public class BookShelfService implements IBookShelfService {
     @Autowired
     ChapterMapper chapterMapper;
 
+    @Transactional
+    @Override
     public boolean addToBookShelf(String userId, String bookId) {
         var userOpt = userMapper.selectById(userId);
         if(userOpt.isPresent()){
@@ -46,6 +49,8 @@ public class BookShelfService implements IBookShelfService {
         return false;
     }
 
+    @Transactional
+    @Override
     public boolean removeFromBookShelf(String userId, String bookId) {
         var userOpt = userMapper.selectById(userId);
         if(userOpt.isPresent()){
@@ -61,6 +66,8 @@ public class BookShelfService implements IBookShelfService {
         return false;
     }
 
+
+    @Override
     public BookShelfVO getFromBookShelf(String userId, String bookId) {
         var userOpt = userMapper.selectById(userId);
         if(userOpt.isPresent()){
@@ -77,6 +84,8 @@ public class BookShelfService implements IBookShelfService {
         return null;
     }
 
+    @Transactional
+    @Override
     //先暂时定为没有chapterid和order不能加入书架
     public boolean updateBookShelf(String userId, String bookId, BookShelfRequestDTO dto) {
         var userOpt = userMapper.selectById(userId);
@@ -106,6 +115,7 @@ public class BookShelfService implements IBookShelfService {
         return false;
     }
 
+    @Override
     public PageRecord<BookShelfVO> getUserBookShelf(String userId, Integer pageNumber, Integer pageSize) {
         var userOpt = userMapper.selectById(userId);
         if (userOpt.isPresent()) {
@@ -126,6 +136,7 @@ public class BookShelfService implements IBookShelfService {
         return null;
     }
 
+    @Transactional
     private Boolean addToLibrary(String userId, String bookId){
         var bookshelf = new ReaderBookShelf();
         bookshelf.setBookId(bookId);
