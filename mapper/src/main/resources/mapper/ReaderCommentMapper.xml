@@ -15,12 +15,48 @@
         <result property="createdAt" column="created_at"/>
     </resultMap>
 
+    <resultMap id="CommentWithAuthorInfoResultMap" type="com.mipa.common.vo.CommentAndUserInfoVO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="message" column="message"/>
+        <result property="replyCommentId" column="reply_comment_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="userName" column="user_name"/>
+        <result property="avatarUrl" column="avatar_url"/>
+    </resultMap>
+
+    <sql id="CommentWithAuthorInfoBaseSelect">
+        SELECT
+        rc.id as id,
+        rc.user_id as user_id,
+        rc.book_id as book_id,
+        rc.chapter_id as chapter_id,
+        rc.message as message,
+        rc.reply_comment_id as reply_comment_id,
+        rc.created_at as created_at,
+        u.name as user_name,
+        u.avatar_url as avatar_url
+        FROM reader_comment rc
+        LEFT JOIN user u ON rc.user_id = u.id
+    </sql>
+
     <select id="selectById" resultMap="ReaderCommentResultMap" parameterType="String">
         SELECT * FROM reader_comment WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="ReaderCommentResultMap">
         SELECT * FROM reader_comment
+    </select>
+
+    <select id="selectAllWithUserInfoBybookIdAndChapterId" resultMap="CommentWithAuthorInfoResultMap" parameterType="map">
+        <include refid="CommentWithAuthorInfoBaseSelect"/>
+        WHERE rc.book_id = #{bookId} AND rc.chapter_id = #{chapterId}
+    </select>
+    <select id="selectAllWithUserInfoById" resultMap="CommentWithAuthorInfoResultMap" parameterType="string">
+        <include refid="CommentWithAuthorInfoBaseSelect"/>
+        WHERE rc.id = #{id}
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.ReaderComment">

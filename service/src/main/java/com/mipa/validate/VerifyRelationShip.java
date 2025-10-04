@@ -4,9 +4,11 @@ import com.mipa.common.Enum.VerifyResult;
 import com.mipa.common.utils.TypeSafeMap;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.ChapterMapper;
+import com.mipa.mapper.ReaderCommentMapper;
 import com.mipa.mapper.ReaderProgressMapper;
 import com.mipa.model.Book;
 import com.mipa.model.Chapter;
+import com.mipa.model.ReaderComment;
 import com.mipa.model.ReaderProgress;
 
 import java.util.Objects;
@@ -26,7 +28,7 @@ public class VerifyRelationShip {
 
 
     public VerifyRelationShip verifyBookAndChapter(String bookId, String chapterId, ChapterMapper mapper) {
-        if (result == VerifyResult.Failed) return this;
+        if (!isSucceed()) return failed();
         var chapterOpt = mapper.selectById(chapterId);
         if (chapterOpt.isEmpty()) {
             result = VerifyResult.Failed;
@@ -42,7 +44,7 @@ public class VerifyRelationShip {
     }
 
     public VerifyRelationShip verifyAuthorAndBook(String authorId, String bookId, BookMapper mapper) {
-        if (result == VerifyResult.Failed) return this;
+        if (!isSucceed()) return failed();
         var bookOpt = mapper.selectById(bookId);
         if (bookOpt.isEmpty()) {
             result = VerifyResult.Failed;
@@ -58,7 +60,7 @@ public class VerifyRelationShip {
     }
 
     public VerifyRelationShip verifyChapterIdAndOrder(Integer chapterOrder, String chapterId, ChapterMapper mapper) {
-        if (result == VerifyResult.Failed) return this;
+        if (!isSucceed()) return failed();
         var chapter = TSM.get(Chapter.class);
         if (chapter != null && Objects.equals(chapter.getChapterOrder(), chapterOrder)) return this;
 
@@ -82,7 +84,7 @@ public class VerifyRelationShip {
      * @return
      */
     public VerifyRelationShip verifyReaderProgressAndUser(String userId, String readerProgressId, ReaderProgressMapper mapper) {
-        if (result == VerifyResult.Failed) return this;
+        if (!isSucceed()) return failed();
         var readerProgress = get(ReaderProgress.class);
         if (readerProgress == null) {
             var readerProgressOpt = mapper.selectById(readerProgressId);
@@ -100,8 +102,42 @@ public class VerifyRelationShip {
         return this;
     }
 
+    /**
+     * 验证这条评论是否是yserid发送的
+     * @param userId
+     * @param commentId
+     * @param mapper
+     * @return
+     */
+    public VerifyRelationShip verifyCommentAndUserId(String userId, String commentId, ReaderCommentMapper mapper) {
+        if (!isSucceed()) return failed();
+        var comment = TSM.get(ReaderComment.class);
+        if (comment == null) {
+            var commentOpt = mapper.selectById(commentId);
+            if (commentOpt.isEmpty())
+                return failed();
+            comment = commentOpt.get();
+        }
+        if (Objects.equals(comment.getUserId(), userId)) {
+            TSM.put(ReaderComment.class, comment);
+            return success();
+        }
+        return failed();
+    }
+
     public boolean isSucceed(){
         return result == VerifyResult.Success;
+    }
+
+
+    private VerifyRelationShip success(){
+        result = VerifyResult.Success;
+        return this;
+    }
+
+    private VerifyRelationShip failed(){
+        result = VerifyResult.Failed;
+        return this;
     }
 
     public <T> T get(Class<T> type) {
