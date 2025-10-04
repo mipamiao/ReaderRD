@@ -1,7 +1,5 @@
 package com.mipa.common.vo;
 
-import com.mipa.common.bookdto.BookDTO;
-import com.mipa.common.chapterdto.ChapterInfoDTO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

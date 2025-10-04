@@ -1,8 +1,8 @@
 package com.mipa.service.api;
 
-import com.mipa.common.chapterdto.ChapterInfoAndContentDTO;
-import com.mipa.common.chapterdto.ChapterInfoDTO;
-import com.mipa.common.chapterdto.ChapterRequestDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoAndContentDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoDTO;
+import com.mipa.common.dto.chapterdto.ChapterRequestDTO;
 import com.mipa.common.utils.PageRecord;
 
 

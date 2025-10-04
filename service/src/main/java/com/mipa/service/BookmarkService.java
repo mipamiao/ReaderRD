@@ -1,8 +1,7 @@
 package com.mipa.service;
 
-import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
-import com.mipa.common.bookmarkdto.BookmarkInfoListDTO;
-import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.ChapterMapper;
@@ -14,7 +13,6 @@ import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 

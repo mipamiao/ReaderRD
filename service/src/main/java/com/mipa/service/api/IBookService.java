@@ -1,8 +1,6 @@
 package com.mipa.service.api;
 
-import com.github.pagehelper.PageInfo;
-import com.mipa.common.bookdto.BookDTO;
-import com.mipa.common.bookdto.BookRequestDTO;
+import com.mipa.common.dto.bookdto.BookRequestDTO;
 import java.util.Optional;
 
 import com.mipa.common.utils.PageRecord;

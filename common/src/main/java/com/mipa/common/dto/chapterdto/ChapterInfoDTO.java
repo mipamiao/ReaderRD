@@ -1,17 +1,16 @@
-package com.mipa.common.bookmarkdto;
+package com.mipa.common.dto.chapterdto;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class BookmarkInfoDTO {
-    private String id;
+public class ChapterInfoDTO {
+    private String authorId;
     private String bookId;
     private String chapterId;
-    private String chapterTitle;
+    private String name;
     private Integer chapterOrder;
-    private String note;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

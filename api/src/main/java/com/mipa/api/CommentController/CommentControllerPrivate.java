@@ -2,10 +2,9 @@ package com.mipa.api.CommentController;
 
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.commentdto.CommentDTO;
+import com.mipa.common.dto.commentdto.CommentDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.vo.CommentAndUserInfoVO;
-import com.mipa.service.UserService;
 import com.mipa.service.api.ICommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

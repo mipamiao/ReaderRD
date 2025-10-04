@@ -2,9 +2,8 @@ package com.mipa.api.userController;
 
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.filedto.FileUploadResponseDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.common.userDTO.UserInfoDTO;
+import com.mipa.common.dto.userDTO.UserInfoDTO;
 import com.mipa.service.FileService;
 import com.mipa.service.api.IUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.File;
 
 @RestController
 @RequestMapping(path = "/api/private/auth", produces = "application/json")

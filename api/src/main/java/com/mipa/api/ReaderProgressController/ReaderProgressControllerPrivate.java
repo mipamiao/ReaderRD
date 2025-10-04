@@ -1,7 +1,7 @@
 package com.mipa.api.ReaderProgressController;
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.readprogressDTO.ReaderProgressDTO;
+import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.vo.ReaderProgressVO;
 import com.mipa.service.api.IReaderProgressService;

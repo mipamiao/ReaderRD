@@ -2,7 +2,7 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mipa.common.commentdto.CommentDTO;
+import com.mipa.common.dto.commentdto.CommentDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.CommentAndUserInfoVO;

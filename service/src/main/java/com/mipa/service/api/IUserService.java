@@ -1,7 +1,7 @@
 package com.mipa.service.api;
 
-import com.mipa.common.userDTO.UserInfoDTO;
-import com.mipa.common.userDTO.UserRegisterDTO;
+import com.mipa.common.dto.userDTO.UserInfoDTO;
+import com.mipa.common.dto.userDTO.UserRegisterDTO;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;

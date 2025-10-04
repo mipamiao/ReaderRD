@@ -1,16 +1,13 @@
 package com.mipa.api.chapterController;
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.chapterdto.ChapterInfoDTO;
-import com.mipa.common.chapterdto.ChapterRequestDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoDTO;
+import com.mipa.common.dto.chapterdto.ChapterRequestDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.service.ChapterService;
-import com.mipa.service.UserService;
 import com.mipa.service.api.IChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

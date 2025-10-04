@@ -1,6 +1,6 @@
 package com.mipa.service.api;
 
-import com.mipa.common.readprogressDTO.ReaderProgressDTO;
+import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.ReaderProgressVO;
 

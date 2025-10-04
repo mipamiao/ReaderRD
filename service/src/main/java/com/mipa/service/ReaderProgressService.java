@@ -2,7 +2,7 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mipa.common.readprogressDTO.ReaderProgressDTO;
+import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.ReaderProgressVO;
@@ -15,8 +15,6 @@ import com.mipa.utils.IdUtil;
 import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ReaderProgressService implements IReaderProgressService {

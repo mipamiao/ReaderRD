@@ -2,8 +2,7 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mipa.common.bookdto.BookDTO;
-import com.mipa.common.bookdto.BookRequestDTO;
+import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.configuration.MyConfiguration;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
@@ -18,7 +17,6 @@ import com.mipa.model.*;
 import com.mipa.service.api.IBookService;
 import com.mipa.utils.IdUtil;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +26,11 @@ import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class BookService implements IBookService {

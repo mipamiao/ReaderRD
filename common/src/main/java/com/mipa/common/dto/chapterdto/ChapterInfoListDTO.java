@@ -1,4 +1,4 @@
-package com.mipa.common.chapterdto;
+package com.mipa.common.dto.chapterdto;
 
 import lombok.Data;
 

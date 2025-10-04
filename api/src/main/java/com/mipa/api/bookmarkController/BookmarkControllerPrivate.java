@@ -1,10 +1,9 @@
 package com.mipa.api.bookmarkController;
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
-import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.service.BookmarkService;
 import com.mipa.service.api.IBookmarkService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;

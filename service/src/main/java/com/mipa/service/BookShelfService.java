@@ -2,8 +2,7 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mipa.common.librarydto.LibraryDTO;
-import com.mipa.common.librarydto.LibraryRequestDTO;
+import com.mipa.common.dto.bookshelfdto.BookShelfRequestDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookShelfVO;
@@ -15,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -80,7 +78,7 @@ public class BookShelfService implements IBookShelfService {
     }
 
     //先暂时定为没有chapterid和order不能加入书架
-    public boolean updateBookShelf(String userId, String bookId, LibraryRequestDTO dto) {
+    public boolean updateBookShelf(String userId, String bookId, BookShelfRequestDTO dto) {
         var userOpt = userMapper.selectById(userId);
         if (userOpt.isPresent()) {
             var bookOpt = bookMapper.selectById(bookId);

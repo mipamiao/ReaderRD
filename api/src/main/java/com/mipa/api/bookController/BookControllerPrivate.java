@@ -1,8 +1,8 @@
 package com.mipa.api.bookController;
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.bookdto.BookListResponseDTO;
-import com.mipa.common.bookdto.BookRequestDTO;
+import com.mipa.common.dto.bookdto.BookListResponseDTO;
+import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.service.BookService;
 import org.springframework.beans.factory.annotation.Autowired;

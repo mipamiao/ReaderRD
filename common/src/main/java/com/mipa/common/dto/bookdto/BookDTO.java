@@ -1,4 +1,4 @@
-package com.mipa.common.bookdto;
+package com.mipa.common.dto.bookdto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+
 public class BookDTO {
     private String id;
 

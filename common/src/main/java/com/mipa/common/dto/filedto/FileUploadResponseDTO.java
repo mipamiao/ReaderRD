@@ -1,4 +1,4 @@
-package com.mipa.common.filedto;
+package com.mipa.common.dto.filedto;
 
 public class FileUploadResponseDTO {
     String url;
