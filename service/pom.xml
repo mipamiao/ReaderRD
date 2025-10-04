@@ -30,7 +30,7 @@
         </dependency>
         <dependency>
             <groupId>com.mipa</groupId>
-            <artifactId>Mapper</artifactId>
+            <artifactId>mapper</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

@@ -15,12 +15,45 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
+    <resultMap id="ReaderProgressVOResultMap" type="com.mipa.common.vo.ReaderProgressVO">
+
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="bookName" column="book_name"/>
+        <result property="coverUrl" column="cover_url"/>
+    </resultMap>
+
+
+
     <select id="selectById" resultMap="ReaderProgressResultMap" parameterType="String">
         SELECT * FROM reader_progress WHERE id = #{id}
     </select>
 
     <select id="selectAll" resultMap="ReaderProgressResultMap">
         SELECT * FROM reader_progress
+    </select>
+
+    <select id="selectByUserIdAndBookId" resultMap="ReaderProgressResultMap" parameterType="map">
+        SELECT * FROM reader_progress
+        WHERE user_id = #{userId} AND book_id = #{bookId}
+    </select>
+
+    <select id="selectAllByUserId" resultMap="ReaderProgressResultMap" parameterType="String">
+        SELECT * FROM reader_progress
+        WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectAllAndBookByUserId" resultMap="ReaderProgressVOResultMap" parameterType="String">
+        SELECT
+            rp.book_id as book_id,
+            rp.chapter_id as chapter_id,
+            rp.chapter_order as chapter_order,
+            b.name as book_name,
+            b.cover_url as cover_url
+        FROM reader_progress rp
+        LEFT JOIN book b ON rp.book_id = b.id
+        WHERE user_id = #{userId}
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.ReaderProgress">
@@ -33,7 +66,7 @@
         SET user_id = #{userId},
         book_id = #{bookId},
         chapter_id = #{chapterId},
-        chapter_order = #{chapterOrder},
+        chapter_order = #{chapterOrder}
         WHERE id = #{id}
     </update>
 

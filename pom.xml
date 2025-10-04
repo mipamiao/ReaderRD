@@ -55,7 +55,7 @@
 		<module>common</module>
 		<module>api</module>
 		<module>auth</module>
-        <module>Mapper</module>
+        <module>mapper</module>
     </modules>
     <scm>
 		<connection/>
