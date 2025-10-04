@@ -5,6 +5,7 @@ import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
 import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.service.api.IBookmarkService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class BookmarkControllerPrivate {
     @PostMapping(path = "add", consumes = "application/json")
     public ApiResponse<BookmarkInfoDTO> addBookmark(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody BookmarkRequestDTO dto
+            @RequestBody @Valid BookmarkRequestDTO dto
     ) {
         var res = bookmarkService.addBookmark(dto, userSecurity.getUserId());
         if (res != null)
@@ -32,7 +33,7 @@ public class BookmarkControllerPrivate {
     @PostMapping(path = "update", consumes = "application/json")
     public ApiResponse<Boolean> updateBookmark(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody BookmarkRequestDTO dto,
+            @RequestBody @Valid BookmarkRequestDTO dto,
             @RequestParam(name = "bookmarkId") String bookmarkId
     ) {
         var res = bookmarkService.updateBookmark(dto, bookmarkId, userSecurity.getUserId());

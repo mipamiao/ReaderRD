@@ -6,6 +6,7 @@ import com.mipa.common.dto.commentdto.CommentDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.vo.CommentAndUserInfoVO;
 import com.mipa.service.api.ICommentService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class CommentControllerPrivate {
     @PostMapping(path = "add", consumes = "application/json")
     public ApiResponse<CommentAndUserInfoVO> addComment(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody CommentDTO dto
+            @RequestBody @Valid CommentDTO dto
     ) {
         var res = commentService.addComment(dto, userSecurity.getUserId());
         if (res != null)

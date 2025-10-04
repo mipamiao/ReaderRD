@@ -5,6 +5,7 @@ import com.mipa.common.dto.chapterdto.ChapterInfoDTO;
 import com.mipa.common.dto.chapterdto.ChapterRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.service.api.IChapterService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -21,7 +22,7 @@ public class ChapterPrivateController {
     @PostMapping(path = "/add", consumes = "application/json")
     public ApiResponse<ChapterInfoDTO> addChapter(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody ChapterRequestDTO dto
+            @RequestBody @Valid ChapterRequestDTO dto
     ) {
         dto.setAuthorId(userSecurity.getUserId());
         var result = chapterService.addChapter(dto);
@@ -33,7 +34,7 @@ public class ChapterPrivateController {
     @PostMapping(path = "/update", consumes = "application/json")
     public ApiResponse<Boolean> updateChapter(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody ChapterRequestDTO dto,
+            @RequestBody @Valid ChapterRequestDTO dto,
             @RequestParam(name = "chapterId") String chapterId
     ) {
         dto.setAuthorId(userSecurity.getUserId());

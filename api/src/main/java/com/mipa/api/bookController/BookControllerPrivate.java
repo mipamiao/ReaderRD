@@ -5,6 +5,7 @@ import com.mipa.common.dto.bookdto.BookListResponseDTO;
 import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.service.BookService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,8 +21,9 @@ public class BookControllerPrivate {
 
     @PreAuthorize("hasRole('WRITER")
     @PostMapping(path = "/add", consumes = "application/json")
-    public ApiResponse<Boolean> addBook(@RequestBody BookRequestDTO dto,
-        @AuthenticationPrincipal UserSecurity userSecurity) {
+    public ApiResponse<Boolean> addBook(
+            @RequestBody @Valid BookRequestDTO dto,
+            @AuthenticationPrincipal UserSecurity userSecurity) {
         var res = bookService.addBook(dto, userSecurity.getUserId());
         if (res) {
             return ApiResponse.success(null);
@@ -31,9 +33,10 @@ public class BookControllerPrivate {
 
     @PreAuthorize("hasRole('WRITER")
     @PostMapping(path = "/update", consumes = "application/json")
-    public ApiResponse<Boolean> updateBook(@RequestBody BookRequestDTO dto,
-        @AuthenticationPrincipal UserSecurity userSecurity,
-        @RequestParam(required = true) String bookId) {
+    public ApiResponse<Boolean> updateBook(
+            @RequestBody @Valid BookRequestDTO dto,
+            @AuthenticationPrincipal UserSecurity userSecurity,
+            @RequestParam(required = true) String bookId) {
         var res = bookService.updateBook(dto, userSecurity.getUserId(), bookId);
         if (res) {
             return ApiResponse.success(null);
@@ -43,9 +46,10 @@ public class BookControllerPrivate {
 
     @PreAuthorize("hasRole('WRITER")
     @DeleteMapping(path = "/remove", consumes = "application/json")
-    public ApiResponse<Boolean> deleteBook(@AuthenticationPrincipal UserSecurity userSecurity,
-        @RequestParam(required = true) String bookId) {
-        var res = bookService.deleteBook(bookId,userSecurity.getUserId());
+    public ApiResponse<Boolean> deleteBook(
+            @AuthenticationPrincipal UserSecurity userSecurity,
+            @RequestParam(required = true) String bookId) {
+        var res = bookService.deleteBook(bookId, userSecurity.getUserId());
         if (res) {
             return ApiResponse.success(null);
         }
