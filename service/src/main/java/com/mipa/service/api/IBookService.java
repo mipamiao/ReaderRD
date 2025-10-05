@@ -24,5 +24,5 @@ public interface IBookService {
 
   PageRecord<BookWithTagAndAuthorNameVO> getBooksByUserId(String userId, int pageNumber, int pageSize);
 
-  String updateCoverImage(MultipartFile file, String bookId, String userId)
+  String updateCoverImage(MultipartFile file, String bookId, String userId);
 }

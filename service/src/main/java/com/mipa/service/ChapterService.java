@@ -39,21 +39,21 @@ public class ChapterService implements IChapterService {
     @Transactional
     @Override
     public ChapterInfoDTO addChapter(ChapterRequestDTO dto) {
-        var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), null);
-        if (resultData.result) {
-            var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(dto.getBookId(), dto.getChapterOrder());
-            if (chapterOpt.isPresent()) return null;
-            bookMapper.updateChapterCount(resultData.book.getId(), resultData.book.getChapterCount() + 1);
-            var chapter = CopyProperties.run(dto, Chapter.class);
-            chapter.setId(IdUtil.uuid());
-            chapterMapper.insert(chapter);
-            var result = chapterMapper.selectInfoById(chapter.getId());
-            var chapterInfoDto = CopyProperties.run(result.get(), ChapterInfoDTO.class);
-            chapterInfoDto.setChapterId(chapter.getId());
-            chapterInfoDto.setAuthorId(dto.getAuthorId());
-            return chapterInfoDto;
-        }
-        return null;
+        var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(dto.getBookId(), dto.getChapterOrder());
+        if (chapterOpt.isPresent()) return null;
+
+        var bookOpt = bookMapper.selectById(dto.getBookId());
+        if (bookOpt.isEmpty()) return null;
+
+        bookMapper.updateChapterCount(bookOpt.get().getId(), bookOpt.get().getChapterCount() + 1);
+        var chapter = CopyProperties.run(dto, Chapter.class);
+        chapter.setId(IdUtil.uuid());
+        chapterMapper.insert(chapter);
+        var result = chapterMapper.selectInfoById(chapter.getId());
+        var chapterInfoDto = CopyProperties.run(result.get(), ChapterInfoDTO.class);
+        chapterInfoDto.setChapterId(chapter.getId());
+        chapterInfoDto.setAuthorId(dto.getAuthorId());
+        return chapterInfoDto;
     }
 
     @Transactional
@@ -178,7 +178,7 @@ public class ChapterService implements IChapterService {
                                 return new ResultData(true, user, book, chapter);
                             }
                         }
-                    }else {
+                    } else {
                         return new ResultData(true, user, book, null);
                     }
                 }

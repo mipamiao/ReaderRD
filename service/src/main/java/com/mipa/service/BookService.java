@@ -92,18 +92,13 @@ public class BookService implements IBookService {
     @Transactional
     @Override
     public Boolean addBook(BookRequestDTO bookRequestDTO, String userId) {
-        var userOpt = userMapper.selectById(userId) ;
-        if(userOpt.isPresent()){
-            var user = userOpt.get();
-            var book = CopyProperties.run(bookRequestDTO, Book.class);
-            var bookId = IdUtil.uuid();
-            book.setId(bookId);
-            book.setAuthorId(user.getId());
-            bookMapper.insert(book);
-            addBookTag(bookRequestDTO.getTags(), bookId);
-            return true;
-        }
-        return false;
+        var book = CopyProperties.run(bookRequestDTO, Book.class);
+        var bookId = IdUtil.uuid();
+        book.setId(bookId);
+        book.setAuthorId(userId);
+        bookMapper.insert(book);
+        addBookTag(bookRequestDTO.getTags(), bookId);
+        return true;
     }
 
     @Transactional
@@ -207,6 +202,7 @@ public class BookService implements IBookService {
         return add_or_update_book_tag(tagNames, book_id, false);
     }
 
+    //todo 改一下为批量插入
     private boolean add_or_update_book_tag(List<String> tagNames, String book_id, boolean need_del) {
         var tags = tagNames.stream().map(tagName -> {
             var tagOpt = tagMapper.selectByName(tagName);

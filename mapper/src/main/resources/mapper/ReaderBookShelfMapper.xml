@@ -15,6 +15,17 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
+    <resultMap id="ReaderBookShelfWithCoverResultMap" type="com.mipa.common.vo.BookShelfVO">
+        <id property="id" column="id"/>
+        <result property="userId" column="user_id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+        <result property="coverUrl" column="cover_url"/>
+    </resultMap>
+
     <select id="selectById" resultMap="ReaderBookShelfResultMap" parameterType="String">
         SELECT * FROM reader_bookshelf WHERE id = #{id}
     </select>
@@ -30,6 +41,15 @@
     <select id="selectByUserId" resultMap="ReaderBookShelfResultMap" parameterType="String">
         SELECT * FROM reader_bookshelf
         WHERE user_id = #{userId}
+    </select>
+
+    <select id="selectDetailAndCoverByUserIdAndBookId" resultMap="ReaderBookShelfWithCoverResultMap" parameterType="map">
+        SELECT
+            rb.*,
+            b.cover_url
+        FROM reader_bookshelf rb
+        LEFT JOIN book b ON rb.book_id = b.id
+        WHERE rb.user_id = #{userId} AND rb.book_id = #{bookId}
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.ReaderBookShelf">
@@ -48,6 +68,11 @@
 
     <delete id="delete" parameterType="String">
         DELETE FROM reader_bookshelf WHERE id = #{id}
+    </delete>
+
+    <delete id="deleteByUserIdAndBookId" parameterType="map">
+        DELETE FROM reader_bookshelf
+        WHERE user_id = #{userId} AND book_id = #{bookId}
     </delete>
 
 </mapper>
