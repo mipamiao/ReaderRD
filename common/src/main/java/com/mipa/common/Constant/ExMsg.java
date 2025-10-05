@@ -29,9 +29,18 @@ public class ExMsg {
     public final static String BOOKMARK_NOT_EXIST = "书签不存在";
     public final static String BOOKMARK_USER_MISMATCH = "书签与用户不匹配";
 
+    public final static String BOOKSHELF_HAD_EXIST = "书籍已存在书架";
+    public final static String BOOKSHELF_NOT_EXIST = "书籍不存在书架";
+    public final static String BOOKSHELF_USER_MISMATCH = "书架与用户不匹配";
+
+    public final static String COMMENT_HAD_EXIST = "评论已存在";
+    public final static String COMMENT_NOT_EXIST = "评论不存在";
+    public final static String COMMENT_USER_MISMATCH = "评论与用户不匹配";
 
     public final static String EMPTY_FILE = "文件为空";
     public final static String FILE_SAVE_ERROR = "文件存储出错";
+
+    public final static String LACK_CHAPTER = "该书籍没有章节";
 
     public static String And(String ...strs){
         var stringBuilder = new StringBuilder();
