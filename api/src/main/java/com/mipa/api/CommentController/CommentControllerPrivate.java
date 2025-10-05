@@ -34,9 +34,7 @@ public class CommentControllerPrivate {
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam("commentId") String commentId
     ) {
-        var res = commentService.delComment(userSecurity.getUserId(), commentId);
-        if (res)
-            return ApiResponse.success(true);
-        return ApiResponse.unauthorized(false);
+        commentService.delComment(userSecurity.getUserId(), commentId);
+        return ApiResponse.success(true);
     }
 }

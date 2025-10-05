@@ -157,5 +157,17 @@
         WHERE id = #{id}
     </update>
 
+    <update id="incChapterCount" parameterType="String">
+        UPDATE book
+        SET chapter_count = chapter_count + 1
+        WHERE id = #{id}
+    </update>
+
+    <update id="decChapterCount" parameterType="String">
+        UPDATE book
+        SET chapter_count = chapter_count - 1
+        WHERE id = #{id}
+    </update>
+
 
 </mapper>

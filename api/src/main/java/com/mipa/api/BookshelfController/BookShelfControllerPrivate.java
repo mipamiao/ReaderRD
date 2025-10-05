@@ -40,12 +40,8 @@ public class BookShelfControllerPrivate {
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam String bookId
     ) {
-        boolean result = bookShelfService.addToBookShelf(userSecurity.getUserId(), bookId);
-        if (result) {
-            return ApiResponse.success(true);
-        } else {
-            return ApiResponse.status(HttpStatus.BAD_REQUEST, "Failed to add to library", false);
-        }
+       bookShelfService.addToBookShelf(userSecurity.getUserId(), bookId);
+        return ApiResponse.success(true);
     }
 
     @PostMapping(path = "/update", consumes = "application/json" )
@@ -53,12 +49,8 @@ public class BookShelfControllerPrivate {
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestBody @Valid BookShelfRequestDTO dto
     ) {
-        boolean result = bookShelfService.updateBookShelf(userSecurity.getUserId(), dto.getBookId(), dto);
-        if (result) {
-            return ApiResponse.success(true);
-        } else {
-            return ApiResponse.status(HttpStatus.BAD_REQUEST, "Failed to update library", false);
-        }
+        bookShelfService.updateBookShelf(userSecurity.getUserId(), dto.getBookId(), dto);
+        return ApiResponse.success(true);
     }
 
     @DeleteMapping(path = "/remove")
@@ -66,11 +58,7 @@ public class BookShelfControllerPrivate {
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam String bookId
     ) {
-        boolean result = bookShelfService.removeFromBookShelf(userSecurity.getUserId(), bookId);
-        if (result) {
-            return ApiResponse.success(true);
-        } else {
-            return ApiResponse.status(HttpStatus.BAD_REQUEST, "Failed to remove from library", false);
-        }
+        bookShelfService.removeFromBookShelf(userSecurity.getUserId(), bookId);
+        return ApiResponse.success(true);
     }
 }

@@ -5,6 +5,17 @@
 
 <mapper namespace="com.mipa.mapper.ReaderBookmarkMapper">
 
+    <resultMap id="ReaderBookmarkWithChapterTitleResultMap" type="com.mipa.common.vo.BookmarkInfoVO">
+        <id property="id" column="id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="note" column="note"/>
+        <result property="chapterOrder" column="chapter_order"/>
+        <result property="chapterTitle" column="chapter_title"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
     <resultMap id="ReaderBookmarkResultMap" type="com.mipa.model.ReaderBookmark">
         <id property="id" column="id"/>
         <result property="userId" column="user_id"/>
@@ -15,6 +26,20 @@
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
+
+    <sql id="BookmarkWithChapterTitleSelect">
+        SELECT
+        rb.id,
+        rb.book_id,
+        rb.chapter_id,
+        rb.note,
+        rb.chapter_order,
+        c.name as chapter_title,
+        rb.created_at,
+        rb.updated_at
+        FROM reader_bookmark rb
+        LEFT JOIN chapter c ON rb.chapter_id = c.id
+    </sql>
 
     <select id="selectById" resultMap="ReaderBookmarkResultMap" parameterType="String">
         SELECT * FROM reader_bookmark WHERE id = #{id}
@@ -31,6 +56,19 @@
     <select id="selectByUserIdAndBookId" resultMap="ReaderBookmarkResultMap" parameterType="map">
         SELECT * FROM reader_bookmark
         WHERE user_id = #{userId} AND book_id = #{bookId}
+    </select>
+
+    <select id="selectInfoById" resultMap="ReaderBookmarkWithChapterTitleResultMap" parameterType="string">
+        <include refid="BookmarkWithChapterTitleSelect"/>
+        WHERE rb.id = #{id}
+    </select>
+    <select id="selectInfoByUserIdAndBookIdAndChapterId" resultMap="ReaderBookmarkWithChapterTitleResultMap" parameterType="map">
+        <include refid="BookmarkWithChapterTitleSelect"/>
+        WHERE rb.user_id = #{userId} AND rb.book_id = #{bookId} AND rb.chapter_id = #{chapterId}
+    </select>
+    <select id="selectInfoByUserIdAndBookId" resultMap="ReaderBookmarkWithChapterTitleResultMap" parameterType="map">
+        <include refid="BookmarkWithChapterTitleSelect"/>
+        WHERE rb.user_id = #{userId} AND rb.book_id = #{bookId}
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.ReaderBookmark">

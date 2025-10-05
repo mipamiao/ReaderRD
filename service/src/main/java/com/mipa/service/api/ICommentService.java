@@ -7,7 +7,7 @@ import com.mipa.common.vo.CommentAndUserInfoVO;
 public interface ICommentService {
     CommentAndUserInfoVO addComment(CommentDTO dto, String userId);
 
-    boolean delComment(String userId, String commentId);
+    void delComment(String userId, String commentId);
 
     PageRecord<CommentAndUserInfoVO> listComment(String bookId, String chapterId, Integer pageNumber, Integer pageSize);
 }

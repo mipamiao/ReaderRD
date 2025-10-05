@@ -41,11 +41,6 @@ public class BookControllerPublic {
     public ApiResponse<BookWithTagAndAuthorNameVO> getBookById(
             @RequestParam(required = true) String bookId
     ) {
-        var bookOpt = bookService.findById(bookId);
-        if (bookOpt.isPresent()) {
-            return ApiResponse.success(bookOpt.get());
-        } else {
-            return ApiResponse.status(HttpStatus.NOT_FOUND, "Book not found", null);
-        }
+        return ApiResponse.success(bookService.findById(bookId));
     }
 }

@@ -22,4 +22,6 @@ public interface TagMapper {
     Optional<Tag> selectByName(@Param("name") String name);
 
     List<Tag> selectByNames(@Param("names") List<String> names);
+
+	int insertBatch(@Param("tags") List<Tag> tags);
 }

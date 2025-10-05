@@ -14,13 +14,13 @@ public interface IBookService {
 
   PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize);
 
-  Optional<BookWithTagAndAuthorNameVO> findById(String bookId);
+  BookWithTagAndAuthorNameVO findById(String bookId);
 
   Boolean addBook(BookRequestDTO bookRequestDTO, String userId);
 
-  Boolean updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId);
+  void updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId);
 
-  Boolean deleteBook(String bookId, String userId);
+  void deleteBook(String bookId, String userId);
 
   PageRecord<BookWithTagAndAuthorNameVO> getBooksByUserId(String userId, int pageNumber, int pageSize);
 

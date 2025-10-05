@@ -2,7 +2,9 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.dto.bookshelfdto.BookShelfRequestDTO;
+import com.mipa.common.exception.BizException;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookShelfVO;
@@ -13,6 +15,7 @@ import com.mipa.utils.IdUtil;
 import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -35,40 +38,54 @@ public class BookShelfService implements IBookShelfService {
 
     @Transactional
     @Override
-    public boolean addToBookShelf(String userId, String bookId) {
-        var bookshelfOpt = readerBookShelfMapper.selectByUserIdAndBookId(userId, bookId);
-        if (bookshelfOpt.isEmpty()) {
-            var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(bookId, 1);
-            if (chapterOpt.isPresent()) {
-                var bookshelf = new ReaderBookShelf();
-                bookshelf.setBookId(bookId);
-                bookshelf.setUserId(userId);
-                bookshelf.setChapterId(chapterOpt.get().getId());
-                bookshelf.setChapterOrder(1);
-                bookshelf.setId(IdUtil.uuid());
-                readerBookShelfMapper.insert(bookshelf);
-                return true;
+    public void addToBookShelf(String userId, String bookId) {
+        try{
+            var bookshelfOpt = readerBookShelfMapper.selectByUserIdAndBookId(userId, bookId);
+            if (bookshelfOpt.isEmpty()) {
+                var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(bookId, 1);
+                if (chapterOpt.isPresent()) {
+                    var bookshelf = new ReaderBookShelf();
+                    bookshelf.setBookId(bookId);
+                    bookshelf.setUserId(userId);
+                    bookshelf.setChapterId(chapterOpt.get().getId());
+                    bookshelf.setChapterOrder(1);
+                    bookshelf.setId(IdUtil.uuid());
+                    readerBookShelfMapper.insert(bookshelf);
+                }
+                throw BizException.badRequest(ExMsg.LACK_CHAPTER);
             }
+            throw BizException.badRequest(ExMsg.BOOKSHELF_HAD_EXIST);
+        }catch (DataIntegrityViolationException e){
+            throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
         }
-        return false;
+
     }
 
     @Transactional
     @Override
-    public boolean removeFromBookShelf(String userId, String bookId) {
-        return readerBookShelfMapper.deleteByUserIdAndBookId(userId, bookId) > 0;
+    public void removeFromBookShelf(String userId, String bookId) {
+        try {
+            readerBookShelfMapper.deleteByUserIdAndBookId(userId, bookId);
+        } catch (DataIntegrityViolationException e) {
+            throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
+        }
+
     }
 
 
     @Override
     public BookShelfVO getFromBookShelf(String userId, String bookId) {
-        return readerBookShelfMapper.selectDetailAndCoverByUserIdAndBookId(userId, bookId).orElse(null);
+        try{
+            return readerBookShelfMapper.selectDetailAndCoverByUserIdAndBookId(userId, bookId).orElse(null);
+        } catch (DataIntegrityViolationException e) {
+            throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
+        }
     }
 
     @Transactional
     @Override
     //先暂时定为没有chapterid和order不能加入书架
-    public boolean updateBookShelf(String userId, String bookId, BookShelfRequestDTO dto) {
+    public void updateBookShelf(String userId, String bookId, BookShelfRequestDTO dto) {
 
         var vr = VerifyRelationShip.start()
                 .verifyBookAndChapter(dto.getBookId(), dto.getChapterId(), chapterMapper)
@@ -78,11 +95,14 @@ public class BookShelfService implements IBookShelfService {
             removeFromBookShelf(userId, bookId);
             var bookshelf = CopyProperties.run(dto, ReaderBookShelf.class);
             bookshelf.setId(IdUtil.uuid());
-            readerBookShelfMapper.insert(bookshelf);
-            return true;
+            try {
+                readerBookShelfMapper.insert(bookshelf);
+            } catch (DataIntegrityViolationException e) {
+                throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
+            }
+        } else {
+            throw BizException.badRequest(ExMsg.Or(ExMsg.CHAPTER_BOOK_MISMATCH, ExMsg.CHAPTER_ID_ORDER_MISMATCH));
         }
-
-        return false;
     }
 
     @Override

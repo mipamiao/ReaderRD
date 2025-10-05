@@ -7,7 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.Optional;
 
 public interface IUserService {
-    boolean save(UserRegisterDTO userRegisterDTO);
+    void save(UserRegisterDTO userRegisterDTO);
     Optional<UserInfoDTO> load(String userId);
 
     String updateAvatar(MultipartFile file, String userId);

@@ -2,7 +2,9 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.dto.commentdto.CommentDTO;
+import com.mipa.common.exception.BizException;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.CommentAndUserInfoVO;
@@ -36,20 +38,21 @@ public class CommentService implements ICommentService {
             newItem.setUserId(userId);
             commentMapper.insert(newItem);
             return commentMapper.selectAllWithUserInfoById(newItem.getId()).get();
+        }else{
+            throw BizException.badRequest(ExMsg.CHAPTER_BOOK_MISMATCH);
         }
-        return null;
     }
 
 
     @Transactional
     @Override
-    public boolean delComment(String userId, String commentId){
+    public void delComment(String userId, String commentId){
         var vr =  VerifyRelationShip.start().verifyCommentAndUserId(userId, commentId, commentMapper);
         if (vr.isSucceed()) {
             commentMapper.delete(commentId);
-            return true;
+        }else {
+            throw BizException.badRequest(ExMsg.COMMENT_USER_MISMATCH);
         }
-        return false;
     }
 
     @Override
@@ -60,7 +63,8 @@ public class CommentService implements ICommentService {
             var res = commentMapper.selectAllWithUserInfoBybookIdAndChapterId(bookId, chapterId);
             var pageInfo = new PageInfo<>(res);
             return PageRecord.of(pageInfo.getList(), pageInfo);
+        } else {
+            throw BizException.badRequest(ExMsg.CHAPTER_BOOK_MISMATCH);
         }
-        return null;
     }
 }

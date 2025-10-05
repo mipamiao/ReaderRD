@@ -38,9 +38,8 @@ public class ChapterPrivateController {
             @RequestParam(name = "chapterId") String chapterId
     ) {
         dto.setAuthorId(userSecurity.getUserId());
-        var result = chapterService.updateChapter(dto, chapterId);
-        if (result) return ApiResponse.success(null);
-        return ApiResponse.unauthorized(null);
+        chapterService.updateChapter(dto, chapterId);
+        return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('WRITER')")
@@ -50,9 +49,8 @@ public class ChapterPrivateController {
             @RequestParam(name = "bookId") String bookId,
             @RequestParam(name = "chapterId") String chapterId
     ) {
-        var result = chapterService.deleteChapter(userSecurity.getUserId(), bookId, chapterId);
-        if (result) return ApiResponse.success(null);
-        return ApiResponse.unauthorized(null);
+        chapterService.deleteChapter(userSecurity.getUserId(), bookId, chapterId);
+        return ApiResponse.success(null);
     }
 
 

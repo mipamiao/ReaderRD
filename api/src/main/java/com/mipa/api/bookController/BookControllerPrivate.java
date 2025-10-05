@@ -38,11 +38,8 @@ public class BookControllerPrivate {
             @RequestBody @Valid BookRequestDTO dto,
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam(required = true) String bookId) {
-        var res = bookService.updateBook(dto, userSecurity.getUserId(), bookId);
-        if (res) {
-            return ApiResponse.success(null);
-        }
-        return ApiResponse.status(HttpStatus.CONFLICT, null);
+        bookService.updateBook(dto, userSecurity.getUserId(), bookId);
+        return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('WRITER")
@@ -50,11 +47,8 @@ public class BookControllerPrivate {
     public ApiResponse<Boolean> deleteBook(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam(required = true) String bookId) {
-        var res = bookService.deleteBook(bookId, userSecurity.getUserId());
-        if (res) {
-            return ApiResponse.success(null);
-        }
-        return ApiResponse.status(HttpStatus.CONFLICT, null);
+        bookService.deleteBook(bookId, userSecurity.getUserId());
+        return ApiResponse.success(null);
     }
 
     @PreAuthorize("hasRole('WRITER")

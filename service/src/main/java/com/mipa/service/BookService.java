@@ -2,8 +2,10 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.configuration.MyConfiguration;
+import com.mipa.common.exception.BizException;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookWithAuthorVO;
@@ -17,7 +19,10 @@ import com.mipa.model.*;
 import com.mipa.service.api.IBookService;
 import com.mipa.utils.IdUtil;
 
+import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,10 +31,8 @@ import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 @Service
@@ -78,15 +81,16 @@ public class BookService implements IBookService {
 
     @Transactional(readOnly = true)
     @Override
-    public Optional<BookWithTagAndAuthorNameVO> findById(String bookId) {
+    public BookWithTagAndAuthorNameVO findById(String bookId) {
         var bookWithAuthor = bookMapper.selectBookAndAuthorById(bookId);
-        if (bookWithAuthor.isPresent()) {
-            var res = CopyProperties.run(bookWithAuthor.get(), BookWithTagAndAuthorNameVO.class);
-            var bookWithTag = bookTagMapper.selectBookAndTagsByBookIds(List.of(bookId));
-            if (!bookWithTag.isEmpty()) res.setTagNames(bookWithTag.get(0).getTagNames());
-            return Optional.of(res);
-        }
-        return Optional.empty();
+        if (bookWithAuthor.isEmpty())
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.BOOK_NOT_EXIST);
+
+        var res = CopyProperties.run(bookWithAuthor.get(), BookWithTagAndAuthorNameVO.class);
+        var bookWithTag = bookTagMapper.selectBookAndTagsByBookIds(List.of(bookId));
+        if (!bookWithTag.isEmpty()) res.setTagNames(bookWithTag.get(0).getTagNames());
+
+        return res;
     }
 
     @Transactional
@@ -96,56 +100,54 @@ public class BookService implements IBookService {
         var bookId = IdUtil.uuid();
         book.setId(bookId);
         book.setAuthorId(userId);
-        bookMapper.insert(book);
-        addBookTag(bookRequestDTO.getTags(), bookId);
+
+        try {
+            bookMapper.insert(book);
+            addBookTag(bookRequestDTO.getTags(), bookId);
+        } catch (DataIntegrityViolationException e) {
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.DB_CONSTRAIN_FAILED);
+        }
         return true;
     }
 
     @Transactional
     @Override
-    public Boolean updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId) {
-        var userOpt = userMapper.selectById(userId) ;
-        if(userOpt.isPresent()){
-            var user = userOpt.get();
-            var bookOpt = bookMapper.selectById(bookId);
-            if(bookOpt.isPresent()){
-                var existingBook = bookOpt.get();
-                if( existingBook.getAuthorId().equals(userId)){
-                    // 仅更新允许修改的字段
-                    existingBook.setName(bookRequestDTO.getName());
-                    existingBook.setDescription(bookRequestDTO.getDescription());
-                    existingBook.setCoverUrl(bookRequestDTO.getCoverUrl());
-                    existingBook.setCategory(bookRequestDTO.getCategory());
-                    existingBook.setChapterCount(bookRequestDTO.getChapterCount());
-                    bookMapper.update(existingBook);
-
-                    //更新tag
-
-                    return updateBookTag(bookRequestDTO.getTags(), bookId);
-                }
+    public void updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId) {
+        var vr = VerifyRelationShip.start()
+                .verifyAuthorAndBook(userId, bookId, bookMapper);
+        if (vr.isSucceed()) {
+            var book = vr.get(Book.class);
+            book.setName(bookRequestDTO.getName());
+            book.setDescription(bookRequestDTO.getDescription());
+            book.setCategory(bookRequestDTO.getCategory());
+            try {
+                bookMapper.update(book);
+                updateBookTag(bookRequestDTO.getTags(), bookId);
+            } catch (DataIntegrityViolationException e) {
+                throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.DB_CONSTRAIN_FAILED);
             }
+        } else {
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.Or(ExMsg.BOOK_NOT_EXIST, ExMsg.NOT_AUTHOR));
         }
-        return false;
     }
 
     @Transactional
     @Override
-    public Boolean deleteBook(String bookId, String userId) {
-        var userOpt = userMapper.selectById(userId);
-        if (userOpt.isPresent()) {
-            var user = userOpt.get();
-            var bookOpt = bookMapper.selectById(bookId);
-            if (bookOpt.isPresent()) {
-                var existingBook = bookOpt.get();
-                if (existingBook.getAuthorId().equals(userId)) {
-                    bookMapper.delete(bookId);
-                    bookTagMapper.deleteByBookId(bookId);
-                    clearBookTags(bookId);
-                    return true;
-                }
+    public void deleteBook(String bookId, String userId) {
+        var vr = VerifyRelationShip.start()
+                .verifyAuthorAndBook(userId, bookId, bookMapper);
+        if(vr.isSucceed()){
+            try{
+                bookMapper.delete(bookId);
+                bookTagMapper.deleteByBookId(bookId);
+                clearBookTags(bookId);
+            }catch (DataIntegrityViolationException e) {
+                throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.DB_CONSTRAIN_FAILED);
             }
+        }else {
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.Or(ExMsg.BOOK_NOT_EXIST, ExMsg.NOT_AUTHOR));
         }
-        return false;
+
     }
 
     @Transactional(readOnly = true)
@@ -163,17 +165,14 @@ public class BookService implements IBookService {
     @Transactional
     @Override
     public String updateCoverImage(MultipartFile file, String bookId, String userId) {
-        if (file.isEmpty()) return null;
+        if (file.isEmpty())
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.EMPTY_FILE);
 
-        var userOpt = userMapper.selectById(userId);
-        if (userOpt.isEmpty()) return null;
-        var user = userOpt.get();
+        var vr = VerifyRelationShip.start()
+                .verifyAuthorAndBook(userId, bookId, bookMapper);
 
-        var bookOpt = bookMapper.selectById(bookId);
-        if (bookOpt.isEmpty()) return null;
-        var book = bookOpt.get();
-
-        if (book.getAuthorId().equals(userId)) {//todo n+1
+        if (vr.isSucceed()) {
+            var book = vr.get(Book.class);
 
             fileService.createDirIfNotExist(config.bookCoverImgsDstDir);
             String newFilename = fileService.generateUniqueFileName(
@@ -181,49 +180,60 @@ public class BookService implements IBookService {
             );
 
             Path path = Paths.get(fileService.combinePath(config.bookCoverImgsDstDir, newFilename));
-            if (!fileService.saveSmall(file, path)) return null;
+            if (!fileService.saveSmall(file, path))
+                throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.FILE_SAVE_ERROR);
 
             var resultUrl = fileService.combinePath( config.bookCoverImgsSrcDir, newFilename);
             if (book.getCoverUrl() != null) {
                 var oldCoverPath = book.getCoverUrl().replace(config.bookCoverImgsSrcDir, config.bookCoverImgsDstDir);
                 fileService.deleteSmall(oldCoverPath);
             }
-            if (bookMapper.updateCoverUrl(bookId, resultUrl) == 1)
-                return resultUrl;
+            try{
+                bookMapper.updateCoverUrl(bookId, resultUrl);
+            }catch (DataIntegrityViolationException e) {
+                throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.DB_CONSTRAIN_FAILED);
+            }
+            return resultUrl;
+        }else {
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.Or(ExMsg.BOOK_NOT_EXIST, ExMsg.NOT_AUTHOR));
         }
-        return null;
     }
 
     private boolean updateBookTag(List<String> tagNames, String book_id){
-        return add_or_update_book_tag(tagNames, book_id, true);
+        return addOrUpdateBookTag(tagNames, book_id, true);
     }
 
     private boolean addBookTag(List<String> tagNames, String book_id) {
-        return add_or_update_book_tag(tagNames, book_id, false);
+        return addOrUpdateBookTag(tagNames, book_id, false);
     }
 
-    //todo 改一下为批量插入
-    private boolean add_or_update_book_tag(List<String> tagNames, String book_id, boolean need_del) {
-        var tags = tagNames.stream().map(tagName -> {
-            var tagOpt = tagMapper.selectByName(tagName);
-            if (tagOpt.isEmpty()) {
-                var tag = new Tag();
+    @Transactional
+    private boolean addOrUpdateBookTag(List<String> tagNames, String bookId, boolean needDel) {
+
+        List<Tag> existingTags = tagMapper.selectByNames(tagNames);
+        Map<String, Tag> nameToTag = existingTags.stream()
+                .collect(Collectors.toMap(Tag::getName, Function.identity()));
+
+        List<Tag> tagsToInsert = new ArrayList<>();
+        for (String tagName : tagNames) {
+            if (!nameToTag.containsKey(tagName)) {
+                Tag tag = new Tag();
                 tag.setId(IdUtil.uuid());
                 tag.setName(tagName);
-                tagMapper.insert(tag);
-                return tag;
-            } else
-                return tagOpt.get();
-        }).toList();
+                tagsToInsert.add(tag);
+                nameToTag.put(tagName, tag);
+            }
+        }
 
-        var bookTags = tags.stream().map(tag -> {
-            return new BookTag(IdUtil.uuid(), book_id, tag.getId());
-        }).toList();
-
-        if (need_del) bookTagMapper.deleteByBookId(book_id);
-        bookTagMapper.insertBatch(bookTags);
+        if (!tagsToInsert.isEmpty()) tagMapper.insertBatch(tagsToInsert);
+        List<BookTag> bookTags = nameToTag.values().stream()
+                .map(tag -> new BookTag(IdUtil.uuid(), bookId, tag.getId()))
+                .toList();
+        if (needDel) bookTagMapper.deleteByBookId(bookId);
+        if (!bookTags.isEmpty())bookTagMapper.insertBatch(bookTags);
         return true;
     }
+
 
     private List<BookWithTagAndAuthorNameVO> combine(List<BookWithAuthorVO> bookWithAuthors, List<BookWithTagsVO> bookWithTags) {
         Map<String, BookWithTagsVO> bookWithTagsMap = bookWithTags.stream()
