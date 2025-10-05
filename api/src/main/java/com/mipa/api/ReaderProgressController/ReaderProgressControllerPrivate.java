@@ -3,6 +3,7 @@ package com.mipa.api.ReaderProgressController;
 import com.mipa.auth.Security.UserSecurity;
 import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
 import com.mipa.common.response.ApiResponse;
+import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.ReaderProgressVO;
 import com.mipa.service.api.IReaderProgressService;
 import jakarta.validation.Valid;
@@ -24,23 +25,18 @@ public class ReaderProgressControllerPrivate {
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestBody @Valid ReaderProgressDTO dto
             ){
-        var res = readerProgressService.updateReadProgress(dto, userSecurity.getUserId());
-        if(res)
-            return ApiResponse.success(null);
-        return ApiResponse.unauthorized(null);
+        readerProgressService.updateReadProgress(dto, userSecurity.getUserId());
+        return ApiResponse.success(null);
     }
 
     @GetMapping(path = "/list")
-    public ApiResponse<List<ReaderProgressVO>> listReaderProgress(
+    public ApiResponse<PageRecord<ReaderProgressVO>> listReaderProgress(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam(defaultValue = "0", name = "pageNumber") Integer pageNumber,
             @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize
     ){
         var res = readerProgressService.getReaderProgres(userSecurity.getUserId(), pageNumber, pageSize);
-        if(res!=null)
-            return ApiResponse.success(res.datas());
-        else
-            return ApiResponse.unauthorized(null);
+        return ApiResponse.success(res);
     }
 
     @DeleteMapping(path = "del")
@@ -48,9 +44,7 @@ public class ReaderProgressControllerPrivate {
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam("readerProgressId") String readerProgressId
     ) {
-        var res = readerProgressService.delReaderProgress(userSecurity.getUserId(), readerProgressId);
-        if (res)
-            return ApiResponse.success(null);
-        return ApiResponse.unauthorized(null);
+        readerProgressService.delReaderProgress(userSecurity.getUserId(), readerProgressId);
+        return ApiResponse.success(null);
     }
 }

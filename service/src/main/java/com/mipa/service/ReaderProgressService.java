@@ -2,7 +2,9 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
+import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
+import com.mipa.common.exception.BizException;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.ReaderProgressVO;
@@ -14,6 +16,7 @@ import com.mipa.service.api.IReaderProgressService;
 import com.mipa.utils.IdUtil;
 import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +32,7 @@ public class ReaderProgressService implements IReaderProgressService {
 
     @Transactional
     @Override
-    public boolean updateReadProgress(ReaderProgressDTO dto, String userId) {
+    public void updateReadProgress(ReaderProgressDTO dto, String userId) {
         var vr = VerifyRelationShip.start()
                 .verifyBookAndChapter(dto.getBookId(), dto.getChapterId(), chapterMapper)
                 .verifyChapterIdAndOrder(dto.getChapterOrder(), dto.getChapterId(), chapterMapper);
@@ -38,17 +41,23 @@ public class ReaderProgressService implements IReaderProgressService {
             dto.setUserId(userId);
             var readerProgress = CopyProperties.run(dto, ReaderProgress.class);
 
-            var oldReaderProgressOpt = readerProgressMapper.selectByUserIdAndBookId(userId, dto.getBookId());
-            if (oldReaderProgressOpt.isPresent()) {
-                readerProgress.setId(oldReaderProgressOpt.get().getId());
-                readerProgressMapper.update(readerProgress);
-            } else {
-                readerProgress.setId(IdUtil.uuid());
-                readerProgressMapper.insert(readerProgress);
+            try{
+                var oldReaderProgressOpt = readerProgressMapper.selectByUserIdAndBookId(userId, dto.getBookId());
+                if (oldReaderProgressOpt.isPresent()) {
+                    readerProgress.setId(oldReaderProgressOpt.get().getId());
+                    readerProgressMapper.update(readerProgress);
+                } else {
+                    readerProgress.setId(IdUtil.uuid());
+                    readerProgressMapper.insert(readerProgress);
+                }
+            }catch (DataIntegrityViolationException e){
+                throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
             }
-            return true;
+
+
+        }else{
+            throw BizException.badRequest(ExMsg.Or(ExMsg.CHAPTER_BOOK_MISMATCH, ExMsg.CHAPTER_ID_ORDER_MISMATCH));
         }
-        return false;
     }
 
     @Override
@@ -61,12 +70,12 @@ public class ReaderProgressService implements IReaderProgressService {
 
     @Transactional
     @Override
-    public boolean delReaderProgress(String userId, String readerprogressId) {
+    public void delReaderProgress(String userId, String readerprogressId) {
         var vr = VerifyRelationShip.start().verifyReaderProgressAndUser(userId, readerprogressId, readerProgressMapper);
         if (vr.isSucceed()) {
             readerProgressMapper.delete(readerprogressId);
-            return true;
+        }else {
+            throw BizException.badRequest(ExMsg.READPROGRESS_USER_MISMATCH);
         }
-        return false;
     }
 }
