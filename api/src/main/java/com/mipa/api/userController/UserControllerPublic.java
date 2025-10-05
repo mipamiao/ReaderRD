@@ -4,10 +4,11 @@ import com.mipa.auth.Security.JwtUtil;
 import com.mipa.auth.Security.TokenInfo;
 import com.mipa.auth.Security.UserSecurity;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.common.userDTO.UserLoginDTO;
-import com.mipa.common.userDTO.UserLoginResponseDTO;
-import com.mipa.common.userDTO.UserRegisterDTO;
+import com.mipa.common.dto.userDTO.UserLoginDTO;
+import com.mipa.common.dto.userDTO.UserLoginResponseDTO;
+import com.mipa.common.dto.userDTO.UserRegisterDTO;
 import com.mipa.service.api.IUserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +32,7 @@ public class UserControllerPublic {
 
     @PostMapping(value = "/login", consumes = "application/json")
     public ApiResponse<UserLoginResponseDTO> logIn(
-            @RequestBody UserLoginDTO requestDTO) {
+             @RequestBody @Valid UserLoginDTO requestDTO) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(requestDTO.getUserName(), requestDTO.getPassword()));
@@ -53,7 +54,7 @@ public class UserControllerPublic {
     }
 
     @PostMapping(value = "/register", consumes = "application/json" )
-    public ApiResponse<Void> register(@RequestBody UserRegisterDTO userRegisterDTO) {
+    public ApiResponse<Void> register(@RequestBody @Valid UserRegisterDTO userRegisterDTO) {
 
         var success = userService.save(userRegisterDTO);
         if (success) {

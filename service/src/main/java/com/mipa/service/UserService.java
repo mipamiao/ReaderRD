@@ -1,24 +1,19 @@
 package com.mipa.service;
 
 import com.mipa.common.configuration.MyConfiguration;
-import com.mipa.common.response.ApiResponse;
-import com.mipa.common.userDTO.UserInfoDTO;
-import com.mipa.common.userDTO.UserRegisterDTO;
+import com.mipa.common.dto.userDTO.UserInfoDTO;
+import com.mipa.common.dto.userDTO.UserRegisterDTO;
 import com.mipa.mapper.UserMapper;
 import com.mipa.model.User;
 import com.mipa.service.api.IUserService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Optional;
@@ -39,13 +34,14 @@ public class UserService implements IUserService {
     @Autowired
     PasswordEncoder passwordEncoder;
 
+    @Transactional
     @Override
-    public boolean save(UserRegisterDTO userRegisterDTO){
+    public boolean save(UserRegisterDTO userRegisterDTO) {
         var user = new User();
         BeanUtils.copyProperties(userRegisterDTO, user);
         user.setId(IdUtil.uuid());
 
-        if(userMapper.selectByName(user.getName()).isEmpty()){
+        if (userMapper.selectByName(user.getName()).isEmpty()) {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
             userMapper.insert(user);
             return true;
@@ -54,9 +50,9 @@ public class UserService implements IUserService {
     }
 
     @Override
-    public Optional<UserInfoDTO> load(String userId){
+    public Optional<UserInfoDTO> load(String userId) {
         var user = userMapper.selectById(userId);
-        return user.map(item->{
+        return user.map(item -> {
             var dto = new UserInfoDTO();
             BeanUtils.copyProperties(item, dto);
             return dto;

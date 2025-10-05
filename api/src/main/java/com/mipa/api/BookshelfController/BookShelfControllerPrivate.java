@@ -2,12 +2,11 @@ package com.mipa.api.BookshelfController;
 
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.librarydto.LibraryDTO;
-import com.mipa.common.librarydto.LibraryRequestDTO;
+import com.mipa.common.dto.bookshelfdto.BookShelfRequestDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.vo.BookShelfVO;
-import com.mipa.service.BookShelfService;
 import com.mipa.service.api.IBookShelfService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -52,7 +51,7 @@ public class BookShelfControllerPrivate {
     @PostMapping(path = "/update", consumes = "application/json" )
     public ApiResponse<Boolean> updateBookshelf(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody LibraryRequestDTO dto
+            @RequestBody @Valid BookShelfRequestDTO dto
     ) {
         boolean result = bookShelfService.updateBookShelf(userSecurity.getUserId(), dto.getBookId(), dto);
         if (result) {

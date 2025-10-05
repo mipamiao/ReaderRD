@@ -3,9 +3,9 @@ package com.mipa.service;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mipa.common.Enum.OrderEnum;
-import com.mipa.common.chapterdto.ChapterInfoAndContentDTO;
-import com.mipa.common.chapterdto.ChapterInfoDTO;
-import com.mipa.common.chapterdto.ChapterRequestDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoAndContentDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoDTO;
+import com.mipa.common.dto.chapterdto.ChapterRequestDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.mapper.BookMapper;
@@ -37,24 +37,27 @@ public class ChapterService implements IChapterService {
     private BookMapper bookMapper;
 
     @Transactional
+    @Override
     public ChapterInfoDTO addChapter(ChapterRequestDTO dto) {
-        var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), null);
-        if (resultData.result) {
-            var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(dto.getBookId(), dto.getChapterOrder());
-            if (chapterOpt.isPresent()) return null;
-            bookMapper.updateChapterCount(resultData.book.getId(), resultData.book.getChapterCount() + 1);
-            var chapter = CopyProperties.run(dto, Chapter.class);
-            chapter.setId(IdUtil.uuid());
-            chapterMapper.insert(chapter);
-            var result = chapterMapper.selectInfoById(chapter.getId());
-            var chapterInfoDto = CopyProperties.run(result.get(), ChapterInfoDTO.class);
-            chapterInfoDto.setChapterId(chapter.getId());
-            chapterInfoDto.setAuthorId(dto.getAuthorId());
-            return chapterInfoDto;
-        }
-        return null;
+        var chapterOpt = chapterMapper.selectInfoByBookIdAndOrder(dto.getBookId(), dto.getChapterOrder());
+        if (chapterOpt.isPresent()) return null;
+
+        var bookOpt = bookMapper.selectById(dto.getBookId());
+        if (bookOpt.isEmpty()) return null;
+
+        bookMapper.updateChapterCount(bookOpt.get().getId(), bookOpt.get().getChapterCount() + 1);
+        var chapter = CopyProperties.run(dto, Chapter.class);
+        chapter.setId(IdUtil.uuid());
+        chapterMapper.insert(chapter);
+        var result = chapterMapper.selectInfoById(chapter.getId());
+        var chapterInfoDto = CopyProperties.run(result.get(), ChapterInfoDTO.class);
+        chapterInfoDto.setChapterId(chapter.getId());
+        chapterInfoDto.setAuthorId(dto.getAuthorId());
+        return chapterInfoDto;
     }
 
+    @Transactional
+    @Override
     public Boolean updateChapter(ChapterRequestDTO dto, String chapterId) {
         var resultData = checkBookIdAndAuthorId(dto.getBookId(), dto.getAuthorId(), chapterId);
         if (resultData.result) {
@@ -71,6 +74,7 @@ public class ChapterService implements IChapterService {
     }
 
     @Transactional
+    @Override
     public Boolean deleteChapter(String authorId, String bookId, String chapterId) {
         var resultData = checkBookIdAndAuthorId(bookId, authorId, chapterId);
         if (resultData.result) {
@@ -84,6 +88,7 @@ public class ChapterService implements IChapterService {
         return false;
     }
 
+    @Override
     public ChapterInfoDTO getChapterInfo(String bookId, String chapterId) {
         var chapterOpt = chapterMapper.selectInfoById(chapterId);
         if (chapterOpt.isPresent()) {
@@ -97,6 +102,7 @@ public class ChapterService implements IChapterService {
         return null;
     }
 
+    @Override
     public PageRecord<ChapterInfoDTO> listChapters(String bookId, Integer pageNum, Integer pageSize) {
         PageHelper.startPage(pageNum, pageSize);
         var chapters = chapterMapper.selectInfoAllByBookId(bookId, OrderEnum.CHAPTER_ORDER, OrderEnum.DESC);
@@ -109,6 +115,7 @@ public class ChapterService implements IChapterService {
         return PageRecord.of(infos, pageInfo);
     }
 
+    @Override
     public List<ChapterInfoDTO> listAllChapters(String bookId) {
         var chapters = chapterMapper.selectInfoAllByBookId(bookId, OrderEnum.CHAPTER_ORDER, OrderEnum.DESC);
         var pageInfo = new PageInfo<>(chapters);
@@ -121,6 +128,7 @@ public class ChapterService implements IChapterService {
     }
 
     //todo 这里content要是很大的话，可能会有性能问题
+    @Override
     public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, String chapterId) {
         var chapterOpt = chapterMapper.selectById(chapterId);
         if(chapterOpt.isPresent()){
@@ -136,6 +144,7 @@ public class ChapterService implements IChapterService {
         return null;
     }
 
+    @Override
     public ChapterInfoAndContentDTO getChapterInfoAndContent(String bookId, Integer order){
         var chapterOpt = chapterMapper.selectByBookIdAndOrder(bookId, order);
         if(chapterOpt.isPresent()){
@@ -151,7 +160,7 @@ public class ChapterService implements IChapterService {
         return null;
     }
 
-    //todo 这里因为jpa是懒加载，所以会有n+1问题，后续可以优化
+
     //这个函数用来确保书是作者的，并且章节是书的
     private ResultData checkBookIdAndAuthorId(String bookId, String authorId, String chapterId) {
         var userOpt = userMapper.selectById(authorId);
@@ -169,7 +178,7 @@ public class ChapterService implements IChapterService {
                                 return new ResultData(true, user, book, chapter);
                             }
                         }
-                    }else {
+                    } else {
                         return new ResultData(true, user, book, null);
                     }
                 }

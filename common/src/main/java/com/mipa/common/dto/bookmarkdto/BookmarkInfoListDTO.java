@@ -1,4 +1,4 @@
-package com.mipa.common.bookmarkdto;
+package com.mipa.common.dto.bookmarkdto;
 
 import java.util.List;
 

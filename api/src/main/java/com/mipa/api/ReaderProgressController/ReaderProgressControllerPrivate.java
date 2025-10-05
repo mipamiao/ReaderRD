@@ -1,10 +1,11 @@
 package com.mipa.api.ReaderProgressController;
 
 import com.mipa.auth.Security.UserSecurity;
-import com.mipa.common.readprogressDTO.ReaderProgressDTO;
+import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.vo.ReaderProgressVO;
 import com.mipa.service.api.IReaderProgressService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,7 @@ public class ReaderProgressControllerPrivate {
     @PostMapping(path = "/update", consumes = "application/json")
     public ApiResponse<Boolean> updateReaderProgress(
             @AuthenticationPrincipal UserSecurity userSecurity,
-            @RequestBody ReaderProgressDTO dto
+            @RequestBody @Valid ReaderProgressDTO dto
             ){
         var res = readerProgressService.updateReadProgress(dto, userSecurity.getUserId());
         if(res)

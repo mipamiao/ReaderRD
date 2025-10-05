@@ -1,6 +1,6 @@
 package com.mipa.service.api;
 
-import com.mipa.common.commentdto.CommentDTO;
+import com.mipa.common.dto.commentdto.CommentDTO;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.CommentAndUserInfoVO;
 

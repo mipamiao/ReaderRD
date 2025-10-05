@@ -1,8 +1,6 @@
 package com.mipa.api.bookController;
 
-import com.github.pagehelper.PageInfo;
-import com.mipa.common.bookdto.BookDTO;
-import com.mipa.common.bookdto.BookListResponseDTO;
+import com.mipa.common.dto.bookdto.BookListResponseDTO;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.BookWithTagAndAuthorNameVO;

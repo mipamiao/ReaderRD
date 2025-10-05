@@ -1,4 +1,4 @@
-package com.mipa.common.userDTO;
+package com.mipa.common.dto.userDTO;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

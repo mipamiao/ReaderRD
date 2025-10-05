@@ -1,7 +1,7 @@
 package com.mipa.service.api;
 
-import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
-import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
 
 
 import java.util.List;

@@ -1,8 +1,7 @@
 package com.mipa.service;
 
-import com.mipa.common.bookmarkdto.BookmarkInfoDTO;
-import com.mipa.common.bookmarkdto.BookmarkInfoListDTO;
-import com.mipa.common.bookmarkdto.BookmarkRequestDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
+import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.ChapterMapper;
@@ -13,8 +12,8 @@ import com.mipa.service.api.IBookmarkService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -33,6 +32,7 @@ public class BookmarkService implements IBookmarkService {
     @Autowired
     private ReaderBookmarkMapper readerBookmarkMapper;
 
+    @Transactional
     @Override
     public BookmarkInfoDTO addBookmark(BookmarkRequestDTO dto, String userId) {
         var res = checkParam(dto.getBookId(), dto.getChapterId());
@@ -53,6 +53,7 @@ public class BookmarkService implements IBookmarkService {
         return null;
     }
 
+    @Transactional
     @Override
     public Boolean updateBookmark(BookmarkRequestDTO dto, String bookmarkId, String userId) {
         var res = checkParam(dto.getBookId(), dto.getChapterId());
@@ -68,6 +69,7 @@ public class BookmarkService implements IBookmarkService {
         return false;
     }
 
+    @Transactional
     @Override
     public Boolean delBookmark(String bookmarkId, String userId) {
         var  bookmarkOpt = readerBookmarkMapper.selectById(bookmarkId);

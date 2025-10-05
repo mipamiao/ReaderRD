@@ -2,8 +2,7 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mipa.common.bookdto.BookDTO;
-import com.mipa.common.bookdto.BookRequestDTO;
+import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.configuration.MyConfiguration;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
@@ -18,7 +17,6 @@ import com.mipa.model.*;
 import com.mipa.service.api.IBookService;
 import com.mipa.utils.IdUtil;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,13 +26,11 @@ import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 @Service
 public class BookService implements IBookService {
@@ -58,6 +54,8 @@ public class BookService implements IBookService {
     @Autowired
     MyConfiguration config;
 
+    @Transactional(readOnly = true)
+    @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByPageable(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthor();
@@ -67,6 +65,8 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthorByCategory(category);
@@ -76,6 +76,8 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public Optional<BookWithTagAndAuthorNameVO> findById(String bookId) {
         var bookWithAuthor = bookMapper.selectBookAndAuthorById(bookId);
         if (bookWithAuthor.isPresent()) {
@@ -87,22 +89,20 @@ public class BookService implements IBookService {
         return Optional.empty();
     }
 
-
+    @Transactional
+    @Override
     public Boolean addBook(BookRequestDTO bookRequestDTO, String userId) {
-        var userOpt = userMapper.selectById(userId) ;
-        if(userOpt.isPresent()){
-            var user = userOpt.get();
-            var book = CopyProperties.run(bookRequestDTO, Book.class);
-            var bookId = IdUtil.uuid();
-            book.setId(bookId);
-            book.setAuthorId(user.getId());
-            bookMapper.insert(book);
-            addBookTag(bookRequestDTO.getTags(), bookId);
-            return true;
-        }
-        return false;
+        var book = CopyProperties.run(bookRequestDTO, Book.class);
+        var bookId = IdUtil.uuid();
+        book.setId(bookId);
+        book.setAuthorId(userId);
+        bookMapper.insert(book);
+        addBookTag(bookRequestDTO.getTags(), bookId);
+        return true;
     }
 
+    @Transactional
+    @Override
     public Boolean updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId) {
         var userOpt = userMapper.selectById(userId) ;
         if(userOpt.isPresent()){
@@ -128,6 +128,8 @@ public class BookService implements IBookService {
         return false;
     }
 
+    @Transactional
+    @Override
     public Boolean deleteBook(String bookId, String userId) {
         var userOpt = userMapper.selectById(userId);
         if (userOpt.isPresent()) {
@@ -146,6 +148,8 @@ public class BookService implements IBookService {
         return false;
     }
 
+    @Transactional(readOnly = true)
+    @Override
     public PageRecord<BookWithTagAndAuthorNameVO> getBooksByUserId(String userId, int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthorByAuthorId(userId);
@@ -155,8 +159,9 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
-    //todo 事务失败的回滚
+
     @Transactional
+    @Override
     public String updateCoverImage(MultipartFile file, String bookId, String userId) {
         if (file.isEmpty()) return null;
 
@@ -197,6 +202,7 @@ public class BookService implements IBookService {
         return add_or_update_book_tag(tagNames, book_id, false);
     }
 
+    //todo 改一下为批量插入
     private boolean add_or_update_book_tag(List<String> tagNames, String book_id, boolean need_del) {
         var tags = tagNames.stream().map(tagName -> {
             var tagOpt = tagMapper.selectByName(tagName);

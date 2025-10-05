@@ -1,10 +1,9 @@
 package com.mipa.api.chapterController;
 
-import com.mipa.common.chapterdto.ChapterInfoAndContentDTO;
-import com.mipa.common.chapterdto.ChapterInfoDTO;
-import com.mipa.common.chapterdto.ChapterInfoListDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoAndContentDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoDTO;
+import com.mipa.common.dto.chapterdto.ChapterInfoListDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.service.ChapterService;
 import com.mipa.service.api.IChapterService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;

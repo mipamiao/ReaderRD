@@ -2,7 +2,7 @@ package com.mipa.service;
 
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.mipa.common.readprogressDTO.ReaderProgressDTO;
+import com.mipa.common.dto.readprogressDTO.ReaderProgressDTO;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.common.utils.PageRecord;
 import com.mipa.common.vo.ReaderProgressVO;
@@ -15,8 +15,7 @@ import com.mipa.utils.IdUtil;
 import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReaderProgressService implements IReaderProgressService {
@@ -28,6 +27,8 @@ public class ReaderProgressService implements IReaderProgressService {
     ChapterMapper chapterMapper;
 
 
+    @Transactional
+    @Override
     public boolean updateReadProgress(ReaderProgressDTO dto, String userId) {
         var vr = VerifyRelationShip.start()
                 .verifyBookAndChapter(dto.getBookId(), dto.getChapterId(), chapterMapper)
@@ -50,6 +51,7 @@ public class ReaderProgressService implements IReaderProgressService {
         return false;
     }
 
+    @Override
     public PageRecord<ReaderProgressVO> getReaderProgres(String userId, Integer pageNumber, Integer pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var readerProgressVOs = readerProgressMapper.selectAllAndBookByUserId(userId);
@@ -57,6 +59,8 @@ public class ReaderProgressService implements IReaderProgressService {
         return PageRecord.of(pageInfo.getList(), pageInfo);
     }
 
+    @Transactional
+    @Override
     public boolean delReaderProgress(String userId, String readerprogressId) {
         var vr = VerifyRelationShip.start().verifyReaderProgressAndUser(userId, readerprogressId, readerProgressMapper);
         if (vr.isSucceed()) {

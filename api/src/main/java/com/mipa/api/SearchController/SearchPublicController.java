@@ -1,18 +1,13 @@
 package com.mipa.api.SearchController;
 
-import com.mipa.common.bookdto.BookDTO;
-import com.mipa.common.bookdto.BookListResponseDTO;
+import com.mipa.common.dto.bookdto.BookListResponseDTO;
 import com.mipa.common.response.ApiResponse;
-import com.mipa.common.vo.BookWithTagAndAuthorNameVO;
-import com.mipa.service.SearchService;
 import com.mipa.service.api.ISearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/public/search", produces = "application/json")
