@@ -1,7 +1,9 @@
 package com.mipa.service;
 
-import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
+import com.mipa.common.Constant.ExMsg;
+import com.mipa.common.vo.BookmarkInfoVO;
 import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
+import com.mipa.common.exception.BizException;
 import com.mipa.common.utils.CopyProperties;
 import com.mipa.mapper.BookMapper;
 import com.mipa.mapper.ChapterMapper;
@@ -10,7 +12,9 @@ import com.mipa.mapper.UserMapper;
 import com.mipa.model.*;
 import com.mipa.service.api.IBookmarkService;
 import com.mipa.utils.IdUtil;
+import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,60 +38,78 @@ public class BookmarkService implements IBookmarkService {
 
     @Transactional
     @Override
-    public BookmarkInfoDTO addBookmark(BookmarkRequestDTO dto, String userId) {
-        var res = checkParam(dto.getBookId(), dto.getChapterId());
-        if(res.result){
-            var bookmarkOpt = readerBookmarkMapper.selectByUserIdAndBookIdAndChapterId(userId, dto.getBookId(), dto.getChapterId());
-            if(bookmarkOpt.isEmpty()){
+    public BookmarkInfoVO addBookmark(BookmarkRequestDTO dto, String userId) {
 
-                var bookmark = CopyProperties.run(dto, ReaderBookmark.class);
-                bookmark.setId(IdUtil.uuid());
-                bookmark.setUserId(userId);
-                readerBookmarkMapper.insert(bookmark);
-                bookmarkOpt = readerBookmarkMapper.selectById(bookmark.getId());
-                if(bookmarkOpt.isPresent()){
-                    return CopyProperties.run(bookmarkOpt.get(), BookmarkInfoDTO.class);
+        var vr = VerifyRelationShip.start()
+                .verifyBookAndChapter(dto.getBookId(), dto.getChapterId(), chapterMapper)
+                .verifyChapterIdAndOrder(dto.getChapterOrder(), dto.getChapterId(), chapterMapper);
+        if (vr.isSucceed()) {
+            try {
+                var bookmarkOpt = readerBookmarkMapper.selectByUserIdAndBookIdAndChapterId(userId, dto.getBookId(), dto.getChapterId());
+                if (bookmarkOpt.isEmpty()) {
+                    var chapter = vr.get(Chapter.class);
+                    var bookmark = CopyProperties.run(dto, ReaderBookmark.class);
+                    bookmark.setId(IdUtil.uuid());
+                    bookmark.setUserId(userId);
+                    readerBookmarkMapper.insert(bookmark);
+                    var bookmarkInfoOpt = readerBookmarkMapper.selectInfoById(bookmark.getId());
+                    if (bookmarkInfoOpt.isPresent()) {
+                        return CopyProperties.run(bookmarkInfoOpt.get(), BookmarkInfoVO.class);
+                    }
                 }
+                throw BizException.badRequest(ExMsg.BOOKMARK_HAD_EXIST);
+            } catch (DataIntegrityViolationException e) {
+                throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
             }
+
+        } else {
+            throw BizException.badRequest(ExMsg.Or(ExMsg.CHAPTER_BOOK_MISMATCH, ExMsg.CHAPTER_ID_ORDER_MISMATCH));
         }
-        return null;
+
     }
 
     @Transactional
     @Override
-    public Boolean updateBookmark(BookmarkRequestDTO dto, String bookmarkId, String userId) {
-        var res = checkParam(dto.getBookId(), dto.getChapterId());
-        if(res.result){
-            var  bookmarkOpt = readerBookmarkMapper.selectById(bookmarkId);
-            if(bookmarkOpt.isPresent()&& Objects.equals(bookmarkOpt.get().getUserId(), userId)){
-                var bookmark = bookmarkOpt.get();
-                bookmark.setNote(dto.getNote());
-                readerBookmarkMapper.update(bookmark);
-                return true;
+    public void updateBookmark(BookmarkRequestDTO dto, String bookmarkId, String userId) {
+        var vr = VerifyRelationShip.start()
+                .verifyBookAndChapter(dto.getBookId(), dto.getChapterId(), chapterMapper)
+                .verifyChapterIdAndOrder(dto.getChapterOrder(), dto.getChapterId(), chapterMapper);
+        if(vr.isSucceed()){
+            try{
+                var  bookmarkOpt = readerBookmarkMapper.selectById(bookmarkId);
+                if(bookmarkOpt.isPresent()&& Objects.equals(bookmarkOpt.get().getUserId(), userId)){
+                    var bookmark = bookmarkOpt.get();
+                    bookmark.setNote(dto.getNote());
+                    readerBookmarkMapper.update(bookmark);
+                }
+            }catch (DataIntegrityViolationException e){
+                throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
             }
+        }else {
+            throw BizException.badRequest(ExMsg.Or(ExMsg.CHAPTER_BOOK_MISMATCH, ExMsg.CHAPTER_ID_ORDER_MISMATCH));
         }
-        return false;
     }
 
     @Transactional
     @Override
-    public Boolean delBookmark(String bookmarkId, String userId) {
-        var  bookmarkOpt = readerBookmarkMapper.selectById(bookmarkId);
-        if(bookmarkOpt.isPresent()&& Objects.equals(bookmarkOpt.get().getUserId(), userId)){
-            var bookmark = bookmarkOpt.get();
-            readerBookmarkMapper.delete(bookmarkId);
-            return true;
+    public void delBookmark(String bookmarkId, String userId) {
+        var vr = VerifyRelationShip.start()
+                .verifyBookmarkAndUser(userId, bookmarkId, readerBookmarkMapper);
+
+        if(vr.isSucceed()){
+            try{
+                readerBookmarkMapper.delete(bookmarkId);
+            }catch (DataIntegrityViolationException e){
+                throw BizException.badRequest(ExMsg.DB_CONSTRAIN_FAILED);
+            }
+        }else {
+            throw BizException.badRequest(ExMsg.Or(ExMsg.BOOKMARK_USER_MISMATCH));
         }
-        return false;
     }
 
     @Override
-    public List<BookmarkInfoDTO> listAllBookmark(String userId, String bookId) {
-        var bookmarks = readerBookmarkMapper.selectByUserIdAndBookId(userId, bookId);
-        return bookmarks.stream().map(item -> {
-            return CopyProperties.run(item, BookmarkInfoDTO.class);
-        }).toList();
-
+    public List<BookmarkInfoVO> listAllBookmark(String userId, String bookId) {
+        return readerBookmarkMapper.selectInfoByUserIdAndBookId(userId, bookId);
     }
 
 //    @Override
@@ -96,26 +118,11 @@ public class BookmarkService implements IBookmarkService {
 //    }
 
     @Override
-    public BookmarkInfoDTO getBookmark(String userId, String bookId, String chapterId) {
-        var bookmarkOpt = readerBookmarkMapper.selectByUserIdAndBookIdAndChapterId(userId, bookId, chapterId);
-        return bookmarkOpt.map(bookmark -> CopyProperties.run(bookmark, BookmarkInfoDTO.class)).orElse(null);
+    public BookmarkInfoVO getBookmark(String userId, String bookId, String chapterId) {
+        var bookmarkOpt = readerBookmarkMapper.selectInfoByUserIdAndBookIdAndChapterId(userId, bookId, chapterId);
+        if(bookmarkOpt.isEmpty())
+            throw BizException.badRequest(ExMsg.BOOKMARK_NOT_EXIST);
+        return bookmarkOpt.get();
     }
 
-    //用来确保
-    private ResultData checkParam(String bookId, String chapterId) {
-        var bookOpt = bookMapper.selectById(bookId);
-        if (bookOpt.isPresent()) {
-            var book = bookOpt.get();
-            var chapterOpt = chapterMapper.selectById(chapterId);
-            if (chapterOpt.isPresent()) {
-                var chapter = chapterOpt.get();
-                if (Objects.equals(chapter.getBookId(), bookId)) {
-                    return new ResultData(true, book, chapter);
-                }
-            }
-        }
-        return new ResultData(false, null, null);
-    }
-
-    record ResultData(Boolean result, Book book, Chapter chapter){};
 }

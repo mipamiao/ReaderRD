@@ -25,6 +25,10 @@ public class ExMsg {
     public final static String READPROGRESS_NOT_EXIST = "历史记录" + NOT_EXIST;
     public final static String READPROGRESS_USER_MISMATCH = "历史记录与用户不匹配";
 
+    public final static String BOOKMARK_HAD_EXIST = "书签已存在";
+    public final static String BOOKMARK_NOT_EXIST = "书签不存在";
+    public final static String BOOKMARK_USER_MISMATCH = "书签与用户不匹配";
+
 
     public final static String EMPTY_FILE = "文件为空";
     public final static String FILE_SAVE_ERROR = "文件存储出错";

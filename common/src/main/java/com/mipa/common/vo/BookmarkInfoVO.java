@@ -1,11 +1,11 @@
-package com.mipa.common.dto.bookmarkdto;
+package com.mipa.common.vo;
 
 import lombok.Data;
 
 import java.time.LocalDateTime;
 
 @Data
-public class BookmarkInfoDTO {
+public class BookmarkInfoVO {
     private String id;
     private String bookId;
     private String chapterId;

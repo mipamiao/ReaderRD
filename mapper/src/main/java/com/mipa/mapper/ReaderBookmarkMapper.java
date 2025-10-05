@@ -1,5 +1,6 @@
 package com.mipa.mapper;
 
+import com.mipa.common.vo.BookmarkInfoVO;
 import com.mipa.model.ReaderBookmark;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -23,4 +24,11 @@ public interface ReaderBookmarkMapper {
             @Param("userId") String userId, @Param("bookId") String bookId, @Param("chapterId") String chapterId);
 
     List<ReaderBookmark> selectByUserIdAndBookId(@Param("userId") String userId, @Param("bookId") String bookId);
+
+    Optional<BookmarkInfoVO> selectInfoById(@Param("id") String id);
+
+    Optional<BookmarkInfoVO> selectInfoByUserIdAndBookIdAndChapterId(
+            @Param("userId") String userId, @Param("bookId") String bookId, @Param("chapterId") String chapterId);
+
+    List<BookmarkInfoVO> selectInfoByUserIdAndBookId(@Param("userId") String userId, @Param("bookId") String bookId);
 }

@@ -2,14 +2,8 @@ package com.mipa.validate;
 
 import com.mipa.common.Enum.VerifyResult;
 import com.mipa.common.utils.TypeSafeMap;
-import com.mipa.mapper.BookMapper;
-import com.mipa.mapper.ChapterMapper;
-import com.mipa.mapper.ReaderCommentMapper;
-import com.mipa.mapper.ReaderProgressMapper;
-import com.mipa.model.Book;
-import com.mipa.model.Chapter;
-import com.mipa.model.ReaderComment;
-import com.mipa.model.ReaderProgress;
+import com.mipa.mapper.*;
+import com.mipa.model.*;
 
 import java.util.Objects;
 
@@ -74,6 +68,28 @@ public class VerifyRelationShip {
 
         return this;
 
+    }
+
+    /**
+     * 验证这个书签是否是userid用户的
+     * @param userId
+     * @param bookmarkId
+     * @param mapper
+     * @return
+     */
+    public VerifyRelationShip verifyBookmarkAndUser(String userId, String bookmarkId, ReaderBookmarkMapper mapper){
+        if (!isSucceed()) return failed();
+        var bookmark = get(ReaderBookmark.class);
+        if(bookmark == null){
+            var bookmarkOpt = mapper.selectById(bookmarkId);
+            if(bookmarkOpt.isEmpty())return failed();
+            bookmark = bookmarkOpt.get();
+        }
+        if(Objects.equals(bookmark.getUserId(), userId)){
+            TSM.put(ReaderBookmark.class, bookmark);
+            return success();
+        }
+        return failed();
     }
 
     /**

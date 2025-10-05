@@ -1,6 +1,6 @@
 package com.mipa.service.api;
 
-import com.mipa.common.dto.bookmarkdto.BookmarkInfoDTO;
+import com.mipa.common.vo.BookmarkInfoVO;
 import com.mipa.common.dto.bookmarkdto.BookmarkRequestDTO;
 
 
@@ -8,15 +8,15 @@ import java.util.List;
 
 public interface IBookmarkService {
 
-    BookmarkInfoDTO addBookmark(BookmarkRequestDTO dto, String userId);
+    BookmarkInfoVO addBookmark(BookmarkRequestDTO dto, String userId);
 
-    Boolean updateBookmark(BookmarkRequestDTO dto, String bookmarkId, String userId);
+    void updateBookmark(BookmarkRequestDTO dto, String bookmarkId, String userId);
 
-    Boolean delBookmark(String bookmarkId, String userId);
+    void delBookmark(String bookmarkId, String userId);
 
-    List<BookmarkInfoDTO> listAllBookmark(String userId, String bookId);
+    List<BookmarkInfoVO> listAllBookmark(String userId, String bookId);
 
     //Page<BookmarkInfoDTO> listBookmark(String userId, String bookId, Integer pageNum, Integer pageSize);
 
-    BookmarkInfoDTO getBookmark(String userId, String bookId, String chapterId);
+    BookmarkInfoVO getBookmark(String userId, String bookId, String chapterId);
 }
