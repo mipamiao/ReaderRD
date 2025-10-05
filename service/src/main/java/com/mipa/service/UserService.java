@@ -1,14 +1,19 @@
 package com.mipa.service;
 
+import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.configuration.MyConfiguration;
 import com.mipa.common.dto.userDTO.UserInfoDTO;
 import com.mipa.common.dto.userDTO.UserRegisterDTO;
+import com.mipa.common.exception.BizException;
 import com.mipa.mapper.UserMapper;
 import com.mipa.model.User;
 import com.mipa.service.api.IUserService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,22 +41,25 @@ public class UserService implements IUserService {
 
     @Transactional
     @Override
-    public boolean save(UserRegisterDTO userRegisterDTO) {
+    public void save(UserRegisterDTO userRegisterDTO) {
         var user = new User();
         BeanUtils.copyProperties(userRegisterDTO, user);
         user.setId(IdUtil.uuid());
-
-        if (userMapper.selectByName(user.getName()).isEmpty()) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        try{
             userMapper.insert(user);
-            return true;
+        }catch (DuplicateKeyException e){
+            throw new  BizException(HttpStatus.BAD_REQUEST, ExMsg.USERNAME_EXIST);
+        }catch (DataIntegrityViolationException e) {
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.DB_CONSTRAIN_FAILED);
         }
-        return false;
     }
 
     @Override
     public Optional<UserInfoDTO> load(String userId) {
         var user = userMapper.selectById(userId);
+        if (user.isEmpty())
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.USER_NOT_EXIST);
         return user.map(item -> {
             var dto = new UserInfoDTO();
             BeanUtils.copyProperties(item, dto);
@@ -61,22 +69,13 @@ public class UserService implements IUserService {
 
 
     @Transactional
-    private Boolean updateAvatar(String userId, String url) {
-        var userOpt = userMapper.selectById(userId);
-        if(userOpt.isPresent()){
-            userMapper.updateAvatar(userId, url);
-            return true;
-        }
-        return false;
-    }
-
-    @Transactional
     @Override
     public String updateAvatar(MultipartFile file, String userId) {
 
         if(file.isEmpty())return null;
         var userOpt = userMapper.selectById(userId);
-        if(userOpt.isEmpty())return null;
+        if(userOpt.isEmpty())
+            throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.USER_NOT_EXIST);
 
         fileService.createDirIfNotExist(config.avatarsDstDir);
 
@@ -89,7 +88,8 @@ public class UserService implements IUserService {
             return null;
         }
         var resultUrl = fileService.combinePath(config.avatarsSrcDir, newFilename);
-        updateAvatar(userId, resultUrl);
+
+        userMapper.updateAvatar(userId, resultUrl);
 
         if (userOpt.get().getAvatarUrl() != null) {
             var oldAvatarPath = userOpt.get().getAvatarUrl().replace(config.avatarsSrcDir, config.avatarsDstDir);

@@ -3,6 +3,8 @@ package com.mipa.api.userController;
 import com.mipa.auth.Security.JwtUtil;
 import com.mipa.auth.Security.TokenInfo;
 import com.mipa.auth.Security.UserSecurity;
+import com.mipa.common.Constant.ExMsg;
+import com.mipa.common.exception.BizException;
 import com.mipa.common.response.ApiResponse;
 import com.mipa.common.dto.userDTO.UserLoginDTO;
 import com.mipa.common.dto.userDTO.UserLoginResponseDTO;
@@ -32,7 +34,7 @@ public class UserControllerPublic {
 
     @PostMapping(value = "/login", consumes = "application/json")
     public ApiResponse<UserLoginResponseDTO> logIn(
-             @RequestBody @Valid UserLoginDTO requestDTO) {
+            @RequestBody @Valid UserLoginDTO requestDTO) {
         try {
             Authentication auth = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(requestDTO.getUserName(), requestDTO.getPassword()));
@@ -45,23 +47,17 @@ public class UserControllerPublic {
             if (userInfoDTO.isPresent()) {
                 return ApiResponse.success(new UserLoginResponseDTO(token, userInfoDTO.get()));
             } else {
-                return ApiResponse.unauthorized(null);
+                throw new BizException(HttpStatus.BAD_REQUEST, ExMsg.USER_NOT_EXIST);
             }
-
         } catch (AuthenticationException e) {
-            return ApiResponse.unauthorized(null);
+            throw new BizException(HttpStatus.UNAUTHORIZED, ExMsg.USER_OR_PWD_WRONG);
         }
     }
 
     @PostMapping(value = "/register", consumes = "application/json" )
     public ApiResponse<Void> register(@RequestBody @Valid UserRegisterDTO userRegisterDTO) {
-
-        var success = userService.save(userRegisterDTO);
-        if (success) {
-            return ApiResponse.success(null);
-        } else {
-            return ApiResponse.status(HttpStatus.CONFLICT, null);
-        }
+        userService.save(userRegisterDTO);
+        return ApiResponse.success(null);
     }
 
 }
