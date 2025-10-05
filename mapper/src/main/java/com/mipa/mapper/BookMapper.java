@@ -45,6 +45,10 @@ public interface BookMapper {
 
     int updateChapterCount(@Param("id") String id, @Param("chapterCount") Integer chapterCount);
 
+    int incChapterCount(@Param("id") String id);
+
+    int decChapterCount(@Param("id") String id);
+
     int updateUpdatedAtById(@Param("id") String id);
 
 }

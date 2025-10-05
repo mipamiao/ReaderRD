@@ -15,9 +15,12 @@ public class ExMsg {
     public final static String USER_NOT_EXIST = "用户" + NOT_EXIST;
     public final static String BOOK_NOT_EXIST = "书籍不存在";
     public final static String CHAPTER_NOT_EXIST = "章节不存在";
+    public final static String CHAPTER_HAVEN_EXIST = "章节已经存在";
+    public final static String CHAPTER_BOOK_MISMATCH = "章节与书籍不匹配";
 
     public final static String USER_OR_PWD_WRONG = "用户名或密码错误";
     public final static String NOT_AUTHOR = "不是本书作者";
+
 
     public final static String EMPTY_FILE = "文件为空";
     public final static String FILE_SAVE_ERROR = "文件存储出错";

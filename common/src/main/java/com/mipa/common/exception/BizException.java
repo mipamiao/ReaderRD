@@ -13,4 +13,8 @@ public class BizException extends RuntimeException{
     public int getCode() {
         return code;
     }
+
+    public static BizException badRequest(String msg){
+        return new BizException(HttpStatus.BAD_REQUEST, msg);
+    }
 }
