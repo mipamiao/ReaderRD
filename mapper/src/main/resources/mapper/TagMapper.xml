@@ -24,6 +24,13 @@
         INSERT INTO tag (id, name)
         VALUES (#{id}, #{name})
     </insert>
+    <insert id="insertBatch" parameterType="list">
+        INSERT INTO tag (id, name)
+        VALUES
+        <foreach collection="tags" item="tag" separator=",">
+            (#{tag.id}, #{tag.name})
+        </foreach>
+    </insert>
 
     <update id="update" parameterType="com.mipa.model.Tag">
         UPDATE tag
