@@ -18,7 +18,7 @@ public interface IBookService {
 
   Boolean addBook(BookRequestDTO bookRequestDTO, String userId);
 
-  void updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId);
+  void updateBook(String bookId, BookRequestDTO bookRequestDTO, String userId);
 
   void deleteBook(String bookId, String userId);
 

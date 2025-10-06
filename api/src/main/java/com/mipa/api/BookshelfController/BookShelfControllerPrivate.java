@@ -30,7 +30,7 @@ public class BookShelfControllerPrivate {
 
         var bookshelfList = bookShelfService.getUserBookShelf(userSecurity.getUserId(), pageNumber, pageSize);
         if(bookshelfList != null){
-            return ApiResponse.success(bookshelfList.datas());
+            return ApiResponse.success(bookshelfList.getDatas());
         }
         return ApiResponse.status(HttpStatus.NOT_FOUND, "User not found", null);
     }

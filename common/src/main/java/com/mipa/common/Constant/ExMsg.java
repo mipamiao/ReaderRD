@@ -42,6 +42,9 @@ public class ExMsg {
 
     public final static String LACK_CHAPTER = "该书籍没有章节";
 
+    public final static String PAGE_CACHE_PARAM_MISMATCH = "分页缓存参数缺失或出错";
+    public final static String PAGE_CACHE_PARAM_CONFLICT = "分页缓存参数错位，保证前三个参数为 pageNum pageSize cateory 或 第一个参数为 id";
+
     public static String And(String ...strs){
         var stringBuilder = new StringBuilder();
         for(String str: strs){
