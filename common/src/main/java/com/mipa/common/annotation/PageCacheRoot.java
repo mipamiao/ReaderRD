@@ -8,4 +8,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface PageCacheRoot {
 	String fieldName() default "";
+	int ttl() default 300;
 }

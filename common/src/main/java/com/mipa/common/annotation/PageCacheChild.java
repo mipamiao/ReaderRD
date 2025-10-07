@@ -8,4 +8,5 @@ import java.lang.annotation.*;
 @Documented
 public @interface PageCacheChild {
 	String fieldName() default "";
+	int idIndex() default 0;
 }

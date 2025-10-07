@@ -12,7 +12,11 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.connection.ReturnType;
+import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
+import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -20,11 +24,15 @@ import java.beans.IntrospectionException;
 import java.beans.PropertyDescriptor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static org.springframework.util.SerializationUtils.serialize;
 
 @Aspect
 @Component
@@ -33,6 +41,9 @@ public class PageCacheAspect {
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 
+	@Autowired
+	private GenericJackson2JsonRedisSerializer jsonSerializer;
+
 	@Pointcut("@annotation(com.mipa.common.annotation.PageCacheRoot)")
 	public void pointcutRoot(){};
 
@@ -40,7 +51,7 @@ public class PageCacheAspect {
 	public void pointcutChild(){};
 
 	@Around("pointcutRoot()")
-	public Object aroundAdviceRoot(ProceedingJoinPoint joinPoint) throws Throwable{
+	public Object aroundAdviceRoot(ProceedingJoinPoint joinPoint) throws Throwable {
 		Object[] args = joinPoint.getArgs();
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		PageCacheRoot pageCache = signature.getMethod().getAnnotation(PageCacheRoot.class);
@@ -48,22 +59,36 @@ public class PageCacheAspect {
 		if (!verifyParam(pageCache))
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_MISMATCH);
 
-		if(!(args[0] instanceof Integer num && args[1] instanceof Integer size))
+		if (!(args[0] instanceof Integer num && args[1] instanceof Integer size))
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_CONFLICT);
 
 		var key = String.join("_", pageCache.fieldName(), Integer.toString(num), Integer.toString(size));
 		Object object = redisTemplate.opsForValue().get(key);
 		if (object == null) {
-			Object result = joinPoint.proceed();
-			inCache(pageCache.fieldName(), key, result);
-			return result;
+			var lockKey = "lock_key" + key;
+			Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 5, TimeUnit.SECONDS);
+			if (Boolean.TRUE.equals(success)) {
+				try {
+					object = joinPoint.proceed();
+					inCache(pageCache.fieldName(), pageCache.ttl(), key, object);
+				} finally {
+					redisTemplate.delete(lockKey);
+				}
+			} else {
+				for (int i = 0; i < 3; i++) {
+					Thread.sleep(100);
+					object = redisTemplate.opsForValue().get(key);
+					if (object != null) return object;
+				}
+				object = joinPoint.proceed();
+				inCache(pageCache.fieldName(), pageCache.ttl(), key, object);
+			}
 		}
 		return object;
-
 	}
 
 	@Around("pointcutChild()")
-	public Object aroundAdviceChild(ProceedingJoinPoint joinPoint) throws Throwable{
+	public Object aroundAdviceChild(ProceedingJoinPoint joinPoint) throws Throwable {
 		Object[] args = joinPoint.getArgs();
 		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
 		PageCacheChild pageCache = signature.getMethod().getAnnotation(PageCacheChild.class);
@@ -71,7 +96,7 @@ public class PageCacheAspect {
 		if (!verifyParam(pageCache))
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_MISMATCH);
 
-		if(!(args[0] instanceof String id))
+		if (!(args.length > pageCache.idIndex() && args[0] instanceof String id))
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_CONFLICT);
 		String itemKey = String.join("_", pageCache.fieldName(), id);
 		outCache(itemKey);
@@ -81,7 +106,7 @@ public class PageCacheAspect {
 
 	private static final Logger log = LoggerFactory.getLogger(PageCacheAspect.class);
 
-	private void inCache(String field, String key, Object object) {
+	private void inCache(String field, int ttl, String key, Object object) {
 		if (!(object instanceof PageRecord<?> pageRecord)) {
 			log.warn("inCache: 传入对象不是 PageRecord 类型，key = {}", key);
 			return;
@@ -94,11 +119,9 @@ public class PageCacheAspect {
 
 		var keyWithTimeStamp = new TimeStamp<>(key);
 
-
-		redisTemplate.opsForValue().set(key, pageRecord);
-		redisTemplate.opsForValue().set(getTimeStampKeyFromOriginKey(key), keyWithTimeStamp.timeStamp);
-		log.info("inCache: 缓存分页对象，key = {}", key);
-
+		StringBuilder script = new StringBuilder();
+		script.append("redis.call('set', KEYS[1], ARGV[1], 'EX', ARGV[2]); ");
+		script.append("redis.call('set', KEYS[2], ARGV[3]); ");
 		for (Object o : pageRecord.getDatas()) {
 			try {
 				PropertyDescriptor pd = new PropertyDescriptor("id", o.getClass());
@@ -106,15 +129,28 @@ public class PageCacheAspect {
 				Object idValue = getter.invoke(o);
 				if (idValue != null) {
 					String itemKey = field + "_" + idValue;
-					redisTemplate.opsForValue().set(itemKey, keyWithTimeStamp);
-					log.debug("inCache: 元素缓存关联，itemKey = {}, pageKey = {}", itemKey, key);
-				} else {
-					log.warn("inCache: 元素 id 为 null，跳过缓存关联，元素 = {}", o);
+					script.append("redis.call('set', '").append(itemKey)
+							.append("', ARGV[4], 'EX', ").append(ttl + 10).append("); ");
 				}
-			} catch (IllegalAccessException | InvocationTargetException | IntrospectionException e) {
-				log.error("inCache: 获取元素 id 失败，元素 = {}", o, e);
+			} catch (Exception e) {
+				log.error("inCache Lua 构建失败", e);
 			}
 		}
+
+		redisTemplate.execute((RedisCallback<Void>) connection -> {
+			connection.scriptingCommands().eval(
+					script.toString().getBytes(StandardCharsets.UTF_8),
+					ReturnType.STATUS,
+					2,
+					key.getBytes(),
+					getTimeStampKeyFromOriginKey(key).getBytes(),
+					jsonSerializer.serialize(pageRecord),
+					String.valueOf(ttl).getBytes(),
+					String.valueOf(keyWithTimeStamp.timeStamp).getBytes(),
+					jsonSerializer.serialize(keyWithTimeStamp)
+			);
+			return null;
+		});
 	}
 
 	private void outCache(String itemKey) {
@@ -141,11 +177,11 @@ public class PageCacheAspect {
 
 
 	private boolean verifyParam(PageCacheRoot pageCache) {
-		return !pageCache.fieldName().isEmpty();
+		return !(pageCache.fieldName().isEmpty() || pageCache.ttl() <= 0);
 	}
 
 	private boolean verifyParam(PageCacheChild pageCache) {
-		return !pageCache.fieldName().isEmpty();
+		return !(pageCache.fieldName().isEmpty()|| pageCache.idIndex() < 0);
 	}
 
 	private String getTimeStampKeyFromOriginKey(String originKey){

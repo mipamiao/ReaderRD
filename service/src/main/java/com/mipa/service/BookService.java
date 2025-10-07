@@ -71,6 +71,7 @@ public class BookService implements IBookService {
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
+
     @Transactional(readOnly = true)
     @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize) {
@@ -166,6 +167,7 @@ public class BookService implements IBookService {
     }
 
 
+    @PageCacheChild(fieldName = "BookService", idIndex = 1)
     @Transactional
     @Override
     public String updateCoverImage(MultipartFile file, String bookId, String userId) {
