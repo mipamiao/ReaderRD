@@ -9,4 +9,10 @@ import java.lang.annotation.*;
 public @interface PageCacheRoot {
 	String fieldName() default "";
 	int ttl() default 300;
+
+
+	String pageNumberParamIndex();
+	String pageSizeParamIndex();
+
+
 }

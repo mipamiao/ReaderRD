@@ -59,7 +59,7 @@ public class BookService implements IBookService {
     @Autowired
     MyConfiguration config;
 
-    @PageCacheRoot(fieldName = "BookService")
+    @PageCacheRoot(fieldName = "BookService", pageNumberParamIndex = "p0", pageSizeParamIndex = "p1")
     @Transactional(readOnly = true)
     @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByPageable(int pageNumber, int pageSize) {
