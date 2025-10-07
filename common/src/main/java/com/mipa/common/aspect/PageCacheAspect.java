@@ -43,6 +43,14 @@ public class PageCacheAspect {
 
 	private static final String timeStampHashKey = "timeStampHashKey";
 
+	private static final String seqChar = ":";
+
+	private static final String lockKeyPrefix = "lockKey";
+
+	private static final String timeStampKeyPrefix = "timeStampKey" + seqChar;
+
+	private static final String RelationInfo = "RelationInfo";
+
 	@Autowired
 	private RedisTemplate<String, Object> redisTemplate;
 
@@ -71,17 +79,18 @@ public class PageCacheAspect {
 				&& paramMap.get(pageCache.pageSizeParamIndex()) instanceof Integer size))
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_CONFLICT);
 
-		var fieldName = ParamFill.run(pageCache.fieldName(), paramMap);
+		var fieldName = pageCache.fieldName() + seqChar + ParamFill.run(pageCache.extraFieldInfo(), paramMap);
 
-		var key = String.join("_", fieldName, Integer.toString(num), Integer.toString(size));
+		var key = String.join(seqChar, fieldName, Integer.toString(num), Integer.toString(size));
+		var itemFieldKey = String.join(seqChar, pageCache.fieldName(), Integer.toString(num), Integer.toString(size));
 		Object object = redisTemplate.opsForValue().get(key);
 		if (object == null) {
-			var lockKey = "lock_key" + key;
+			var lockKey = lockKeyPrefix + key;
 			Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 5, TimeUnit.SECONDS);
 			if (Boolean.TRUE.equals(success)) {
 				try {
 					object = joinPoint.proceed();
-					inCache(fieldName, pageCache.ttl(), key, object);
+					inCache(pageCache.fieldName(), pageCache.ttl(), key, object, pageCache.idName());
 				} finally {
 					redisTemplate.delete(lockKey);
 				}
@@ -92,7 +101,7 @@ public class PageCacheAspect {
 					if (object != null) return object;
 				}
 				object = joinPoint.proceed();
-				inCache(fieldName, pageCache.ttl(), key, object);
+				inCache(pageCache.fieldName(), pageCache.ttl(), key, object, pageCache.idName());
 			}
 		}
 		return object;
@@ -109,7 +118,7 @@ public class PageCacheAspect {
 
 		if (!(args.length > pageCache.idIndex() && args[0] instanceof String id))
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_CONFLICT);
-		String itemKey = String.join("_", pageCache.fieldName(), id);
+		String itemKey = String.join(seqChar, pageCache.fieldName(), RelationInfo, id);
 		outCache(itemKey);
 		return joinPoint.proceed();
 	}
@@ -117,7 +126,7 @@ public class PageCacheAspect {
 
 	private static final Logger log = LoggerFactory.getLogger(PageCacheAspect.class);
 
-	private void inCache(String field, int ttl, String key, Object object) {
+	private void inCache(String field, int ttl, String key, Object object, String idName) {
 		if (!(object instanceof PageRecord<?> pageRecord)) {
 			log.warn("inCache: 传入对象不是 PageRecord 类型，key = {}", key);
 			return;
@@ -135,11 +144,11 @@ public class PageCacheAspect {
 		script.append("redis.call('set', KEYS[2], ARGV[3], 'EX', ARGV[2]); ");
 		for (Object o : pageRecord.getDatas()) {
 			try {
-				PropertyDescriptor pd = new PropertyDescriptor("id", o.getClass());
+				PropertyDescriptor pd = new PropertyDescriptor(idName, o.getClass());
 				Method getter = pd.getReadMethod();
 				Object idValue = getter.invoke(o);
 				if (idValue != null) {
-					String itemKey = field + "_" + idValue;
+					String itemKey = String.join(seqChar, field, RelationInfo, idValue.toString());
 					script.append("redis.call('hset', '").append(itemKey)
 							.append("', ARGV[4], ARGV[5]);").append("redis.call('EXPIRE', '")
 							.append(itemKey).append("',").append(ttl + 10).append("); ");
@@ -198,7 +207,7 @@ public class PageCacheAspect {
 	}
 
 	private String getTimeStampKeyFromOriginKey(String originKey){
-		return "time_stamp_" + originKey;
+		return timeStampKeyPrefix + originKey;
 	}
 
 }

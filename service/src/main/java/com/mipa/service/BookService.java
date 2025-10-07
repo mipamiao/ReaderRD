@@ -66,12 +66,12 @@ public class BookService implements IBookService {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthor();
         var pageInfo = new PageInfo<>(bookWithAuthors);
-        if(pageInfo.getList().isEmpty()) return PageRecord.of(Collections.emptyList(), pageInfo);
+        if (pageInfo.getList().isEmpty()) return PageRecord.of(Collections.emptyList(), pageInfo);
         var bookWithTags = bookTagMapper.selectBookAndTagsByBookIds(bookWithAuthors.stream().map(item -> item.getId()).toList());
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
-
+    @PageCacheRoot(fieldName = "BookService", pageNumberParamIndex = "p1", pageSizeParamIndex = "p2", extraFieldInfo = "category_${p0}")
     @Transactional(readOnly = true)
     @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize) {

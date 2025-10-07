@@ -14,5 +14,6 @@ public @interface PageCacheRoot {
 	String pageNumberParamIndex();
 	String pageSizeParamIndex();
 
-
+	String idName() default "id";
+	String extraFieldInfo() default "default";
 }
