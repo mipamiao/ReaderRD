@@ -4,6 +4,7 @@ import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.annotation.PageCacheChild;
+import com.mipa.common.annotation.PageCacheCut;
 import com.mipa.common.annotation.PageCacheRoot;
 import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.configuration.MyConfiguration;
@@ -136,6 +137,7 @@ public class BookService implements IBookService {
         }
     }
 
+    @PageCacheCut(fieldName = "BookService")
     @Transactional
     @Override
     public void deleteBook(String bookId, String userId) {

@@ -2,6 +2,7 @@ package com.mipa.common.aspect;
 
 import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.annotation.PageCacheChild;
+import com.mipa.common.annotation.PageCacheCut;
 import com.mipa.common.annotation.PageCacheRoot;
 import com.mipa.common.exception.BizException;
 import com.mipa.common.utils.PageRecord;
@@ -18,6 +19,7 @@ import org.springframework.data.redis.core.RedisCallback;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSerializer;
 import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.util.Pair;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
@@ -63,6 +65,9 @@ public class PageCacheAspect {
 	@Pointcut("@annotation(com.mipa.common.annotation.PageCacheChild)")
 	public void pointcutChild(){};
 
+	@Pointcut("@annotation(com.mipa.common.annotation.PageCacheCut)")
+	public void pointcutCut(){};
+
 	@Around("pointcutRoot()")
 	public Object aroundAdviceRoot(ProceedingJoinPoint joinPoint) throws Throwable {
 		Object[] args = joinPoint.getArgs();
@@ -81,30 +86,16 @@ public class PageCacheAspect {
 
 		var fieldName = pageCache.fieldName() + seqChar + ParamFill.run(pageCache.extraFieldInfo(), paramMap);
 
-		var key = String.join(seqChar, fieldName, Integer.toString(num), Integer.toString(size));
-		var itemFieldKey = String.join(seqChar, pageCache.fieldName(), Integer.toString(num), Integer.toString(size));
-		Object object = redisTemplate.opsForValue().get(key);
-		if (object == null) {
-			var lockKey = lockKeyPrefix + key;
-			Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 5, TimeUnit.SECONDS);
-			if (Boolean.TRUE.equals(success)) {
-				try {
-					object = joinPoint.proceed();
-					inCache(pageCache.fieldName(), pageCache.ttl(), key, object, pageCache.idName());
-				} finally {
-					redisTemplate.delete(lockKey);
-				}
-			} else {
-				for (int i = 0; i < 3; i++) {
-					Thread.sleep(100);
-					object = redisTemplate.opsForValue().get(key);
-					if (object != null) return object;
-				}
-				object = joinPoint.proceed();
-				inCache(pageCache.fieldName(), pageCache.ttl(), key, object, pageCache.idName());
+		var key = String.join(seqChar, fieldName, Integer.toString(size), Integer.toString(num));
+		if (verifyCacheable(parseFieldNameFromKey(key), parsePageNumFromKey(key))) {
+			Object object = redisTemplate.opsForValue().get(key);
+			if (object == null) {
+				object = distriLockToIncache(key, joinPoint, pageCache);
 			}
+			return object;
+		} else {
+			return distriLockToIncache(key, joinPoint, pageCache);
 		}
-		return object;
 	}
 
 	@Around("pointcutChild()")
@@ -121,6 +112,57 @@ public class PageCacheAspect {
 		String itemKey = String.join(seqChar, pageCache.fieldName(), RelationInfo, id);
 		outCache(itemKey);
 		return joinPoint.proceed();
+	}
+
+	@Around("pointcutCut()")
+	public Object aroundAdviceCut(ProceedingJoinPoint joinPoint) throws Throwable {
+		Object[] args = joinPoint.getArgs();
+		MethodSignature signature = (MethodSignature) joinPoint.getSignature();
+		PageCacheCut pageCache = signature.getMethod().getAnnotation(PageCacheCut.class);
+
+		if (!verifyParam(pageCache))
+			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_MISMATCH);
+
+		if (!(args.length > pageCache.idIndex() && args[0] instanceof String id))
+			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.PAGE_CACHE_PARAM_CONFLICT);
+
+		String itemKey = String.join(seqChar, pageCache.fieldName(), RelationInfo, id);
+		Map<Object, Object> entries = redisTemplate.opsForHash().entries(itemKey);
+
+		if (entries.isEmpty()) {
+			log.info("outCache: 没有找到关联缓存，itemKey = {}", itemKey);
+			return null;
+		}
+
+		for (Map.Entry<Object, Object> entry : entries.entrySet()) {
+			var key = entry.getKey().toString();
+			setTopUnCacheable(parseFieldNameFromKey(key), parsePageNumFromKey(key));
+		}
+
+		return joinPoint.proceed();
+	}
+
+	private Object distriLockToIncache(String key, ProceedingJoinPoint joinPoint, PageCacheRoot pageCache) throws Throwable {
+		var lockKey = lockKeyPrefix + key;
+		Object object = null;
+		Boolean success = redisTemplate.opsForValue().setIfAbsent(lockKey, "1", 5, TimeUnit.SECONDS);
+		if (Boolean.TRUE.equals(success)) {
+			try {
+				object = joinPoint.proceed();
+				inCache(pageCache.fieldName(), pageCache.ttl(), key, object, pageCache.idName());
+			} finally {
+				redisTemplate.delete(lockKey);
+			}
+		} else {
+			for (int i = 0; i < 3; i++) {
+				Thread.sleep(100);
+				object = redisTemplate.opsForValue().get(key);
+				if (object != null) return object;
+			}
+			object = joinPoint.proceed();
+			inCache(pageCache.fieldName(), pageCache.ttl(), key, object, pageCache.idName());
+		}
+		return object;
 	}
 
 
@@ -158,6 +200,8 @@ public class PageCacheAspect {
 			}
 		}
 
+		setCacheable(parseFieldNameFromKey(key), parsePageNumFromKey(key), ttl + 10);
+
 		redisTemplate.execute((RedisCallback<Void>) connection -> {
 			connection.scriptingCommands().eval(
 					script.toString().getBytes(StandardCharsets.UTF_8),
@@ -184,11 +228,12 @@ public class PageCacheAspect {
 			return;
 		}
 
-		for(Map.Entry<Object, Object> entry : entries.entrySet()){
+		for (Map.Entry<Object, Object> entry : entries.entrySet()) {
 			var key = entry.getKey().toString();
 			var timeStamp = redisTemplate.opsForValue().get(getTimeStampKeyFromOriginKey(key));
-			if (Objects.equals((Integer) timeStamp, (Integer)entry.getValue())) {
+			if (Objects.equals((Integer) timeStamp, (Integer) entry.getValue())) {
 				redisTemplate.delete(key);
+				setUnCacheable(parseFieldNameFromKey(key), parsePageNumFromKey(key));
 				log.debug("outCache: 删除分页缓存，pageKey = {}", key);
 			}
 		}
@@ -197,12 +242,50 @@ public class PageCacheAspect {
 		log.info("outCache: 删除元素关联集合，itemKey = {}", itemKey);
 	}
 
+	private boolean verifyCacheable(String fieldName, int pageNum){
+		return redisTemplate.opsForZSet().score(fieldName, pageNum) != null;
+	}
+
+	private void setCacheable(String fieldName, int pageNum, int ttl){
+		redisTemplate.opsForZSet().add(fieldName, pageNum, pageNum);
+		redisTemplate.expire(fieldName, ttl, TimeUnit.SECONDS);
+	}
+
+	private void setUnCacheable(String fieldName, int pageNum){
+		redisTemplate.opsForZSet().remove(fieldName, pageNum);
+	}
+
+
+	private void setTopUnCacheable(String fieldName, int pageNum){
+		redisTemplate.opsForZSet().removeRangeByScore(fieldName, pageNum, Double.MAX_VALUE);
+	}
+
+	private String parseFieldNameFromKey(String key) {
+		var items = key.split(seqChar);
+		StringBuilder stringBuilder = new StringBuilder();
+		for (int i = 0; i < items.length - 1; i++) {
+			if (i != 0) stringBuilder.append(seqChar);
+			stringBuilder.append(items[i]);
+		}
+		return stringBuilder.toString();
+	}
+
+	private int parsePageNumFromKey(String key) {
+		var items = key.split(seqChar);
+		return Integer.parseInt(items[items.length - 1]);
+	}
+
+
 
 	private boolean verifyParam(PageCacheRoot pageCache) {
 		return !(pageCache.fieldName().isEmpty() || pageCache.ttl() <= 0);
 	}
 
 	private boolean verifyParam(PageCacheChild pageCache) {
+		return !(pageCache.fieldName().isEmpty()|| pageCache.idIndex() < 0);
+	}
+
+	private boolean verifyParam(PageCacheCut pageCache) {
 		return !(pageCache.fieldName().isEmpty()|| pageCache.idIndex() < 0);
 	}
 
