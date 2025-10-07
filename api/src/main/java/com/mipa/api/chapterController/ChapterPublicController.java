@@ -48,10 +48,10 @@ public class ChapterPublicController {
     ) {
         var page = chapterService.listChapters(bookId, pageNumber,pageSize);
         ChapterInfoListDTO dto = new ChapterInfoListDTO();
-        dto.setChapters(page.datas());
-        dto.setTotal(page.total());
+        dto.setChapters(page.getDatas());
+        dto.setTotal(page.getTotal());
         dto.setPageNumber(pageNumber);
-        dto.setPageSize(page.pageSize());
+        dto.setPageSize(page.getPageSize());
         return ApiResponse.success(dto);
     }
 

@@ -30,8 +30,8 @@ public class BookControllerPublic {
         else page = bookService.findByCategory(category, pageNumber, pageSize);
 
         BookListResponseDTO responseDTO = new BookListResponseDTO();
-        responseDTO.setBooks(page.datas());
-        responseDTO.setTotal(page.total());
+        responseDTO.setBooks(page.getDatas());
+        responseDTO.setTotal(page.getTotal());
         responseDTO.setPageNumber(pageNumber);
         responseDTO.setPageSize(pageSize);
         return ApiResponse.success(responseDTO);

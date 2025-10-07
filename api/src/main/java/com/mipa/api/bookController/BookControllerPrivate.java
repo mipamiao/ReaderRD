@@ -38,7 +38,7 @@ public class BookControllerPrivate {
             @RequestBody @Valid BookRequestDTO dto,
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam(required = true) String bookId) {
-        bookService.updateBook(dto, userSecurity.getUserId(), bookId);
+        bookService.updateBook( bookId, dto, userSecurity.getUserId());
         return ApiResponse.success(null);
     }
 
@@ -60,10 +60,10 @@ public class BookControllerPrivate {
 
         var res = bookService.getBooksByUserId(userSecurity.getUserId(), pageNumber, pageSize);
         BookListResponseDTO dto = new BookListResponseDTO();
-        dto.setBooks(res.datas());
+        dto.setBooks(res.getDatas());
         dto.setPageSize(pageSize);
         dto.setPageNumber(pageNumber);
-        dto.setTotal( res.total());
+        dto.setTotal( res.getTotal());
 
         return ApiResponse.success(dto);
     }

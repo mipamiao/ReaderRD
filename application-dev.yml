@@ -1,0 +1,8 @@
+spring:
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: "mipa"  # 没密码可不写
+      database: 0
+      timeout: 3000

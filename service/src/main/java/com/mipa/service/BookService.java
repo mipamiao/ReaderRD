@@ -3,6 +3,9 @@ package com.mipa.service;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.mipa.common.Constant.ExMsg;
+import com.mipa.common.annotation.PageCacheChild;
+import com.mipa.common.annotation.PageCacheCut;
+import com.mipa.common.annotation.PageCacheRoot;
 import com.mipa.common.dto.bookdto.BookRequestDTO;
 import com.mipa.common.configuration.MyConfiguration;
 import com.mipa.common.exception.BizException;
@@ -57,17 +60,19 @@ public class BookService implements IBookService {
     @Autowired
     MyConfiguration config;
 
+    @PageCacheRoot(fieldName = "BookService", pageNumberParamIndex = "p0", pageSizeParamIndex = "p1")
     @Transactional(readOnly = true)
     @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByPageable(int pageNumber, int pageSize) {
         PageHelper.startPage(pageNumber, pageSize);
         var bookWithAuthors = bookMapper.selectAllBookAndAuthor();
         var pageInfo = new PageInfo<>(bookWithAuthors);
-        if(pageInfo.getList().isEmpty()) return PageRecord.of(Collections.emptyList(), pageInfo);
+        if (pageInfo.getList().isEmpty()) return PageRecord.of(Collections.emptyList(), pageInfo);
         var bookWithTags = bookTagMapper.selectBookAndTagsByBookIds(bookWithAuthors.stream().map(item -> item.getId()).toList());
         return PageRecord.of(combine(bookWithAuthors, bookWithTags), pageInfo);
     }
 
+    @PageCacheRoot(fieldName = "BookService", pageNumberParamIndex = "p1", pageSizeParamIndex = "p2", extraFieldInfo = "category_${p0}")
     @Transactional(readOnly = true)
     @Override
     public PageRecord<BookWithTagAndAuthorNameVO> findByCategory(String category, int pageNumber, int pageSize) {
@@ -110,9 +115,10 @@ public class BookService implements IBookService {
         return true;
     }
 
+    @PageCacheChild(fieldName = "BookService")
     @Transactional
     @Override
-    public void updateBook(BookRequestDTO bookRequestDTO, String userId, String bookId) {
+    public void updateBook(String bookId, BookRequestDTO bookRequestDTO, String userId ) {
         var vr = VerifyRelationShip.start()
                 .verifyAuthorAndBook(userId, bookId, bookMapper);
         if (vr.isSucceed()) {
@@ -131,6 +137,7 @@ public class BookService implements IBookService {
         }
     }
 
+    @PageCacheCut(fieldName = "BookService")
     @Transactional
     @Override
     public void deleteBook(String bookId, String userId) {
@@ -162,6 +169,7 @@ public class BookService implements IBookService {
     }
 
 
+    @PageCacheChild(fieldName = "BookService", idIndex = 1)
     @Transactional
     @Override
     public String updateCoverImage(MultipartFile file, String bookId, String userId) {
