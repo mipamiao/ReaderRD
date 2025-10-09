@@ -141,6 +141,14 @@ public class VerifyRelationShip {
         return failed();
     }
 
+    public VerifyRelationShip verifyContentPageExist(String pageId, ChapterContentPageMapper mapper) {
+        if (!isSucceed()) return failed();
+        var pageOpt = mapper.selectById(pageId);
+        if (pageOpt.isEmpty()) return failed();
+        TSM.put(ChapterContentPage.class, pageOpt.get());
+        return success();
+    }
+
     public boolean isSucceed(){
         return result == VerifyResult.Success;
     }
@@ -159,4 +167,5 @@ public class VerifyRelationShip {
     public <T> T get(Class<T> type) {
         return TSM.get(type);
     }
+
 }

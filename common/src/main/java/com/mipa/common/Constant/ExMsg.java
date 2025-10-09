@@ -45,6 +45,10 @@ public class ExMsg {
     public final static String PAGE_CACHE_PARAM_MISMATCH = "分页缓存参数缺失或出错";
     public final static String PAGE_CACHE_PARAM_CONFLICT = "分页缓存参数错位，保证第idIndex个参数为 id";
 
+    public final static String JSON_PARSE_FAILED = "json解析出错";
+    public final static String JSON_TRANS_FAILED = "json生成出错";
+    public final static String CONTENT_PAGE_LACK = "内容页缺失";
+
     public static String And(String ...strs){
         var stringBuilder = new StringBuilder();
         for(String str: strs){

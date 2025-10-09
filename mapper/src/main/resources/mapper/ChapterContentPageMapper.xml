@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.mipa.mapper.ChapterContentPageMapper">
+    <resultMap id="ContentPageResultMap" type="com.mipa.model.ChapterContentPage">
+        <id property="id" column="id"/>
+        <result property="bookId" column="book_id"/>
+        <result property="userId" column="user_id"/>
+        <result property="data" column="data"/>
+        <result property="chapterId" column="chapter_id"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="selectById" resultMap="ContentPageResultMap" parameterType="string">
+        SELECT * FROM chapter_content_page
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectAll" resultMap="ContentPageResultMap">
+        SELECT * FROM chapter_content_page
+    </select>
+
+    <insert id="insert" parameterType="com.mipa.model.ChapterContentPage">
+        INSERT INTO chapter_content_page(id, user_id, book_id, chapter_id, data)
+        VALUS (#{id}, #{userId}, #{bookId}, #{chapterId}, #{data})
+    </insert>
+
+    <update id="update" parameterType="com.mipa.model.ChapterContentPage">
+        UPDATE chapter_content_page
+        SET user_id = #{userId},
+        book_id = #{bookId},
+        chapter_id = #{chapterId},
+        data = #{data}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="string">
+        DELETE FROM chapter_content_page
+        WHERE id = #{id}
+    </delete>
+
+</mapper>

@@ -217,7 +217,7 @@ public class BookService implements IBookService {
 
     @Transactional
     private boolean addOrUpdateBookTag(List<String> tagNames, String bookId, boolean needDel) {
-
+        if(tagNames.isEmpty())return true;
         List<Tag> existingTags = tagMapper.selectByNames(tagNames);
         Map<String, Tag> nameToTag = existingTags.stream()
                 .collect(Collectors.toMap(Tag::getName, Function.identity()));

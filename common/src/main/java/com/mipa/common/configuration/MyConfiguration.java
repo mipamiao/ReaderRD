@@ -26,4 +26,13 @@ public class MyConfiguration {
 
     @Value("${my-settings.file-separator}")
     public String fileSeparator ;
+
+    @Value("${my-settings.content-page-size}")
+    public Integer contentPageSize ;
+
+    @Value("${my-settings.content-page-top-scale}")
+    public Double contentPageTopScale;
+
+    @Value("${my-settings.content-page-bottom-scale}")
+    public Double contentPageBottomScale;
 }

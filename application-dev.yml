@@ -6,3 +6,21 @@ spring:
       password: "mipa"  # 没密码可不写
       database: 0
       timeout: 3000
+
+my-settings:
+  file-separator: "/"
+  secret: "mipa-secret:mipamipamiaowakuwakupikaqiu"
+  content-page-size: 1024
+  content-page-top-scale: 2.0
+  content-page-bottom-scale: 0.5
+data:
+  settings:
+    data-net:
+      host: "http://10.12.57.22:8080"
+    avatars:
+      srcDir: "/statics/avatars"
+      dstDir: "D:/mipa/files/avatars"
+    book-cover-img:
+      srcDir: "/statics/bookCoverImgs"
+      dstDir: "D:/mipa/files/bookCoverImgs"
+

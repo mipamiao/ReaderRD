@@ -9,7 +9,7 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
 
-    <artifactId>model</artifactId>
+    <artifactId>websocket</artifactId>
 
     <properties>
         <maven.compiler.source>24</maven.compiler.source>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>com.mipa</groupId>
-            <artifactId>common</artifactId>
+            <artifactId>service</artifactId>
             <version>0.0.1-SNAPSHOT</version>
             <scope>compile</scope>
         </dependency>

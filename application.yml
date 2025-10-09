@@ -35,16 +35,4 @@ mybatis:
   mapper-locations: classpath*:mapper/*.xml
 
 
-my-settings:
-  file-separator: "/"
-  secret: "mipa-secret:mipamipamiaowakuwakupikaqiu"
-data:
-  settings:
-    data-net:
-      host: "http://10.12.57.22:8080"
-    avatars:
-      srcDir: "/statics/avatars"
-      dstDir: "D:/mipa/files/avatars"
-    book-cover-img:
-      srcDir: "/statics/bookCoverImgs"
-      dstDir: "D:/mipa/files/bookCoverImgs"
+
