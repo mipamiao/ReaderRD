@@ -13,8 +13,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ChapterContentPage {
-	private String userId;
-	private String bookId;
 	private String chapterId;
 	private String id;
 	private String data;

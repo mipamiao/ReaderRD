@@ -20,4 +20,8 @@ public interface ChapterContentPageMapper {
 	int update(ChapterContentPage chapterContentPage);
 
 	int delete(@Param("id") String id);
+
+	int insertBatch(@Param("pages") List<ChapterContentPage> pages);
+
+	int deleteBatch(@Param("ids") List<String> ids);
 }

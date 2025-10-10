@@ -1,4 +1,4 @@
-package handler;
+package com.mipa.websocket.handler;
 
 import jakarta.websocket.Session;
 

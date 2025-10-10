@@ -6,8 +6,6 @@
 <mapper namespace="com.mipa.mapper.ChapterContentPageMapper">
     <resultMap id="ContentPageResultMap" type="com.mipa.model.ChapterContentPage">
         <id property="id" column="id"/>
-        <result property="bookId" column="book_id"/>
-        <result property="userId" column="user_id"/>
         <result property="data" column="data"/>
         <result property="chapterId" column="chapter_id"/>
         <result property="createdAt" column="created_at"/>
@@ -24,15 +22,22 @@
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.ChapterContentPage">
-        INSERT INTO chapter_content_page(id, user_id, book_id, chapter_id, data)
-        VALUS (#{id}, #{userId}, #{bookId}, #{chapterId}, #{data})
+        INSERT INTO chapter_content_page(id,  chapter_id, data)
+        VALUES (#{id}, #{chapterId}, #{data})
+    </insert>
+
+    <insert id="insertBatch" parameterType="list">
+        INSERT INTO chapter_content_page(id, chapter_id, data)
+        VALUES
+        <foreach collection="pages" item="page" separator=",">
+            (#{page.id}, #{page.chapterId}, #{page.data})
+        </foreach>
+
     </insert>
 
     <update id="update" parameterType="com.mipa.model.ChapterContentPage">
         UPDATE chapter_content_page
-        SET user_id = #{userId},
-        book_id = #{bookId},
-        chapter_id = #{chapterId},
+        SET chapter_id = #{chapterId},
         data = #{data}
         WHERE id = #{id}
     </update>
@@ -40,6 +45,13 @@
     <delete id="delete" parameterType="string">
         DELETE FROM chapter_content_page
         WHERE id = #{id}
+    </delete>
+    <delete id="deleteBatch" parameterType="list">
+        DELETE FROM chapter_content_page
+        WHERE id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
     </delete>
 
 </mapper>

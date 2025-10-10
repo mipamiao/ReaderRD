@@ -1,9 +1,9 @@
+package com.mipa.websocket;
+
 import com.mipa.common.dto.writerwsdto.WriterCommandSet;
-import com.mipa.common.dto.writerwsdto.WriterWsRequestDTO;
 import com.mipa.common.utils.JsonUtils;
-import com.mipa.common.utils.StringUtils;
 import com.mipa.service.api.IContentPageService;
-import handler.WebSocketExceptionHandler;
+import com.mipa.websocket.handler.WebSocketExceptionHandler;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -30,6 +30,7 @@ public class WriterWebSocket {
 
 	@OnOpen
 	public void onOpen(Session session, @PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
+
 		System.out.println("连接成功：" + session.getId());
 		userIdchapterId2SessionMap.put(userId + "_" + chapterId, session);
 	}
@@ -49,9 +50,9 @@ public class WriterWebSocket {
 	}
 
 	@OnClose
-	public void onClose(@PathParam("userId") String userId) {
+	public void onClose(@PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
 		System.out.println("连接关闭");
-		userIdchapterId2SessionMap.remove(userId);
+		userIdchapterId2SessionMap.remove(userId + "_" + chapterId);
 	}
 
 	@OnError

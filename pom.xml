@@ -57,7 +57,7 @@
 		<module>auth</module>
         <module>mapper</module>
         <module>websocket</module>
-    </modules>
+	</modules>
     <scm>
 		<connection/>
 		<developerConnection/>
@@ -133,11 +133,24 @@
 			<artifactId>spring-boot-starter-data-redis</artifactId>
 		</dependency>
 
-		<!-- 推荐使用 JSON 序列化 -->
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
 		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>jakarta.websocket</groupId>
+			<artifactId>jakarta.websocket-api</artifactId>
+			<version>2.1.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+
 
 	</dependencies>
 

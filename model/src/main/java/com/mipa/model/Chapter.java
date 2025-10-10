@@ -17,6 +17,7 @@ public class Chapter {
     private String name;
     private ChapterContentInfo contentInfo;
     private Integer chapterOrder;
+    private Boolean isPublish;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

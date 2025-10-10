@@ -6,15 +6,18 @@ import com.mipa.mapper.ChapterContentPageMapper;
 import com.mipa.mapper.ChapterMapper;
 import com.mipa.model.Chapter;
 import com.mipa.model.ChapterContentPage;
+import com.mipa.service.api.IContentPageService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
-public class ContentPageService {
+public class ContentPageService implements IContentPageService {
 
 	@Autowired
 	ChapterContentPageMapper pageMapper;
@@ -27,8 +30,8 @@ public class ContentPageService {
 
 	@Transactional
 	public ServerCommandSet scheduleOp(WriterCommandSet commands, String userId, String chapterId) {
-		var serverCommands = new ServerCommandSet();
-		var chapter = chapterMapper.selectById(chapterId).get();
+		var serverCommands = ServerCommandSet.builder().commands(new ArrayList<ServerCommand>()).build();
+		var chapter = chapterMapper.selectById(chapterId, true).get();
 		for (var command : commands.getCommands()) {
 			switch (command.getType()) {
 				case GetPageInfo -> {
@@ -77,8 +80,6 @@ public class ContentPageService {
 		var page = new ChapterContentPage();
 		page.setData(command.getData());
 		page.setId(IdUtil.uuid());
-		page.setBookId(chapter.getBookId());
-		page.setUserId(userId);
 		page.setChapterId(chapter.getId());
 		serverCommands.getCommands().add(new ServerCommand(command.getStartPos(), page.getId()));
 		insertPage(page);

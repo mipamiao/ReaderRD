@@ -9,7 +9,7 @@
         <id property="id" column="id"/>
         <result property="bookId" column="book_id"/>
         <result property="name" column="name"/>
-        <result property="content" column="content"/>
+        <result property="contentInfo" column="content_info"/>
         <result property="chapterOrder" column="chapter_order"/>
         <result property="createdAt" column="created_at"/>
         <result property="updatedAt" column="updated_at"/>
@@ -40,8 +40,15 @@
         </if>
     </sql>
 
-    <select id="selectById" resultMap="ChapterResultMap" parameterType="String">
+    <sql id = "ifIncludeUnpublished">
+        <if test="includeUnpublished != true">
+            AND is_publish = TRUE
+        </if>
+    </sql>
+
+    <select id="selectById" resultMap="ChapterResultMap" parameterType="map">
         SELECT * FROM chapter WHERE id = #{id}
+        <include refid="ifIncludeUnpublished"/>
     </select>
 
     <select id="selectAll" resultMap="ChapterResultMap">
@@ -49,8 +56,8 @@
     </select>
 
     <insert id="insert" parameterType="com.mipa.model.Chapter">
-        INSERT INTO chapter (id, book_id, name, content, chapter_order)
-        VALUES (#{id}, #{bookId}, #{name}, #{content}, #{chapterOrder})
+        INSERT INTO chapter (id, book_id, name, content_info, chapter_order, is_publish)
+        VALUES (#{id}, #{bookId}, #{name}, #{contentInfo}, #{chapterOrder}, #{isPublish})
     </insert>
 
     <update id="update" parameterType="com.mipa.model.Chapter">
@@ -62,19 +69,27 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updatePublishState" parameterType="map">
+        UPDATE chapter
+        is_publish = #{publishState}
+        WHERE id = #{id}
+    </update>
+
     <delete id="delete" parameterType="String">
         DELETE FROM chapter WHERE id = #{id}
     </delete>
 
-    <select id="selectInfoAllByBookId" parameterType="String" resultMap="ChapterInfoResultMap">
+    <select id="selectInfoAllByBookId" parameterType="map" resultMap="ChapterInfoResultMap">
         <include refid="ChapterInfoBaseSelect"/>
         WHERE book_id = #{bookId}
+        <include refid="ifIncludeUnpublished"/>
         <include refid="OrderBy"/>
     </select>
 
     <select id="selectInfoByBookIdAndOrder" resultMap="ChapterInfoResultMap" parameterType="map">
         <include refid="ChapterInfoBaseSelect"/>
         WHERE book_id = #{bookId} AND chapter_order = #{chapterOrder}
+        <include refid="ifIncludeUnpublished"/>
     </select>
 
     <select id="selectInfoById" resultMap="ChapterInfoResultMap" parameterType="map">
@@ -85,6 +100,11 @@
     <select id="selectByBookIdAndOrder" resultMap="ChapterResultMap" parameterType="map">
         <include refid="ChapterBaseSelect"/>
         WHERE book_id = #{bookId} AND chapter_order = #{chapterOrder}
+    </select>
+
+    <select id="selectPublishedInfoById" resultType="com.mipa.model.Chapter">
+        <include refid="ChapterInfoBaseSelect"/>
+        WHERE id = #{id} AND is_publish = TRUE
     </select>
 
 

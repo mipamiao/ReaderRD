@@ -3,12 +3,14 @@ package com.mipa.common.utils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mipa.common.Constant.ExMsg;
 import com.mipa.common.exception.BizException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import java.sql.SQLException;
 
+@Slf4j
 @Component
 public class JsonUtils {
 
@@ -26,6 +28,7 @@ public class JsonUtils {
 		try {
 			return objectMapper.readValue(json, type);
 		} catch (Exception e) {
+			log.error(e.getMessage());
 			throw new BizException(HttpStatus.INTERNAL_SERVER_ERROR, ExMsg.JSON_PARSE_FAILED);
 		}
 	}
