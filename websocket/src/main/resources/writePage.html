@@ -42,7 +42,7 @@
 
 <script>
     const userId = '0051e957c8cd41f4a4379793aecc5219';       // TODO: 改成你的 userId
-    const chapterId = 'cdc060a49e58475297a0fe31151e3e9e';    // TODO: 改成你的 chapterId
+    const chapterId = '8987404f7a764731926b26b728aa7139';    // TODO: 改成你的 chapterId
     const wsUrl = `ws://localhost:8080/ws/writer/${userId}/${chapterId}`;
 
     const statusEl = document.getElementById('status');
@@ -77,11 +77,20 @@
       socket.onmessage = (event) => {
         console.log("📩 收到后端消息:", event.data);
         try {
-          const serverCommand = JSON.parse(event.data);
-          // 只取 data 字段
-          if (serverCommand.data !== undefined) {
-            editorEl.value = serverCommand.data;
-            lastContent = serverCommand.data; // 更新最后内容
+          // 先解析整个JSON字符串
+          const serverData = JSON.parse(event.data);
+
+          // 根据后端类定义，应该是ServerCommandSet对象，包含commands数组
+          if (serverData && serverData.commands && serverData.commands.length > 0) {
+            // 获取第一个command
+            const firstCommand = serverData.commands[0];
+            console.log("📩 收到后端消息:",firstCommand);
+            // 如果第一个command有data字段，则显示在编辑框中
+            if (firstCommand && firstCommand.data !== undefined) {
+                console.log("📩 收到后端消息:",firstCommand.data);
+              editorEl.value = firstCommand.data;
+              lastContent = firstCommand.data; // 更新最后内容
+            }
           }
         } catch (e) {
           console.error("解析后端 JSON 出错:", e);
@@ -179,8 +188,8 @@
 
       const msg = {
         type: type,
-        startPos: startPos,
-        otherPos: 0, // 根据需要设置
+        startPos: 0,
+        otherPos: startPos, // 根据需要设置
         num: num,
         data: data
       };

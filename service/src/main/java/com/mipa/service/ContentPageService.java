@@ -63,6 +63,7 @@ public class ContentPageService implements IContentPageService {
 				}
 			}
 		}
+		chapterMapper.update(chapter);
 		return serverCommands;
 	}
 
@@ -76,7 +77,7 @@ public class ContentPageService implements IContentPageService {
 	}
 
 
-	private void insertOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+	public void insertOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
 		var page = new ChapterContentPage();
 		page.setData(command.getData());
 		page.setId(IdUtil.uuid());
@@ -84,15 +85,18 @@ public class ContentPageService implements IContentPageService {
 		serverCommands.getCommands().add(new ServerCommand(command.getStartPos(), page.getId()));
 		insertPage(page);
 		chapter.getContentInfo().getPageIds().add(command.getStartPos(), page.getId());
+		chapter.getContentInfo().getPageWordCounts().add(command.getStartPos(), page.getData().length());
 	}
 
-	private void deleteOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+	public void deleteOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
 		var subList = chapter.getContentInfo().getPageIds().subList(command.getStartPos(), command.getStartPos() + command.getNum());
+		var sublist2 = chapter.getContentInfo().getPageWordCounts().subList(command.getStartPos(), command.getStartPos() + command.getNum());
 		deletePageBatch(subList);
 		subList.clear();
+		sublist2.clear();
 	}
 
-	private void mergeOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+	public void mergeOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
 		String id2 = chapter.getContentInfo().getPageIds().get(command.getOtherPos());
 		String id1 = chapter.getContentInfo().getPageIds().get(command.getStartPos());
 		var page2 = getPage(id2);
@@ -101,29 +105,41 @@ public class ContentPageService implements IContentPageService {
 		page1.setData(newData);
 		deletePage(page2.getId());
 		updatePage(page1);
+		chapter.getContentInfo().getPageWordCounts().subList(command.getOtherPos(), command.getOtherPos()+1).clear();
+		chapter.getContentInfo().getPageIds().subList(command.getOtherPos(), command.getOtherPos()+1).clear();
+		chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page1.getData().length());
 	}
 
-	private void updateAddOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+	public void updateAddOp(String userId, Chapter chapter, WriterCommand command, ServerCommandSet serverCommands) {
 		var page = getPage(chapter.getContentInfo().getPageIds().get(command.getStartPos()));
 		StringBuilder builder = new StringBuilder(page.getData());
 		builder.insert(command.getOtherPos(), command.getData());
 		page.setData(builder.toString());
+		chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page.getData().length());
 		updatePage(page);
 	}
 
-	private void updateRemoveOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+	public void updateRemoveOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
 		var page = getPage(chapter.getContentInfo().getPageIds().get(command.getStartPos()));
 		StringBuilder builder = new StringBuilder(page.getData());
-		builder.delete(command.getOtherPos(), command.getOtherPos() + command.getNum());
+		var end = 0;
+		if(command.getNum()!=-1)end = command.getOtherPos() + command.getNum();
+		else end = page.getData().length();
+		builder.delete(command.getOtherPos(), end);
 		page.setData(builder.toString());
+		chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page.getData().length());
 		updatePage(page);
 	}
 
-	private void updateReplaceOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+	public void updateReplaceOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
 		var page = getPage(chapter.getContentInfo().getPageIds().get(command.getStartPos()));
 		StringBuilder builder = new StringBuilder(page.getData());
-		builder.replace(command.getOtherPos(), command.getOtherPos() + command.getNum(), command.getData());
+		var end = 0;
+		if(command.getNum()!=-1)end = command.getOtherPos() + command.getNum();
+		else end = page.getData().length();
+		builder.replace(command.getOtherPos(), end , command.getData());
 		page.setData(builder.toString());
+		chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page.getData().length());
 		updatePage(page);
 	}
 

@@ -3,6 +3,7 @@ package com.mipa.websocket;
 import com.mipa.common.dto.writerwsdto.WriterCommandSet;
 import com.mipa.common.utils.JsonUtils;
 import com.mipa.service.api.IContentPageService;
+import com.mipa.service.api.ITopOfContentPageService;
 import com.mipa.websocket.handler.WebSocketExceptionHandler;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
@@ -12,16 +13,20 @@ import org.springframework.stereotype.Component;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @Component
 @ServerEndpoint("/ws/writer/{userId}/{chapterId}")
 public class WriterWebSocket {
 
-	static IContentPageService pageService;
+	private static final ExecutorService executor = Executors.newFixedThreadPool(10);
+
+	static ITopOfContentPageService topOfPageService;
 
 	@Autowired
-	public void setPageService(IContentPageService pageService) {
-		WriterWebSocket.pageService = pageService;
+	public void setPageService(ITopOfContentPageService topOfPageService) {
+		WriterWebSocket.topOfPageService = topOfPageService;
 	}
 
 
@@ -38,14 +43,16 @@ public class WriterWebSocket {
 	@OnMessage
 	public void onMessage(String message, @PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
 
-		var session = userIdchapterId2SessionMap.get(userId + "_" + chapterId);
-		try {
-			var commands = JsonUtils.parseJson(message, WriterCommandSet.class);
-			var serverCommands = pageService.scheduleOp(commands, userId, chapterId);
-			session.getBasicRemote().sendText(JsonUtils.toJson(serverCommands));
-		} catch (Exception e) {
-			WebSocketExceptionHandler.handle(session, e);
-		}
+		executor.submit(() -> {
+			var session = userIdchapterId2SessionMap.get(userId + "_" + chapterId);
+			try {
+				var commands = JsonUtils.parseJson(message, WriterCommandSet.class);
+				var serverCommands = topOfPageService.scheduleOp(commands, userId, chapterId);
+				session.getBasicRemote().sendText(JsonUtils.toJson(serverCommands));
+			} catch (Exception e) {
+				WebSocketExceptionHandler.handle(session, e);
+			}
+		});
 
 	}
 

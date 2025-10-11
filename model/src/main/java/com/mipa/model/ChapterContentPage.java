@@ -18,4 +18,8 @@ public class ChapterContentPage {
 	private String data;
 	private LocalDateTime createdAt;
 	private LocalDateTime updatedAt;
+
+	public String getData() {
+		return data==null?"":data;
+	}
 }

@@ -13,4 +13,5 @@ import java.util.List;
 @NoArgsConstructor
 public class ChapterContentInfo {
 	private List<String> pageIds;
+	private List<Integer> pageWordCounts;
 }

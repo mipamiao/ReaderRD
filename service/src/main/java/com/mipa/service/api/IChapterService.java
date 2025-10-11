@@ -33,4 +33,6 @@ public interface IChapterService {
     void updatePublishState(String authorId, String chapterId, Boolean publishState);
 
     List<ChapterInfoDTO> listAllWholeChapters(String authorId, String bookId);
+
+    void clearChapterContent(String chapterId);
 }

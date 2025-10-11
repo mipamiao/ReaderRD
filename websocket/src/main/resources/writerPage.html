@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>WebSocket 文本编辑器</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<h1>📡 WebSocket 文本编辑器</h1>
+<div id="status">正在连接中...</div>
+<div id="progressContainer">
+    <div id="progressBar"></div>
+</div>
+<div id="progressText">加载进度: 0/0</div>
+<textarea id="editor" placeholder="等待后端返回数据..." disabled></textarea>
+<button id="refreshBtn">重新获取内容</button>
+
+<script src="config.js"></script>
+<script src="webSocketManager.js"></script>
+<script src="dataProcessor.js"></script>
+<script src="uiManager.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

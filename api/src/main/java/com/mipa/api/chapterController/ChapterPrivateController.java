@@ -123,4 +123,22 @@ public class ChapterPrivateController {
         return ApiResponse.unauthorized(null);
     }
 
+    @PreAuthorize("hasRole('WRITER')")
+    @GetMapping(path = "clear-content")
+    public ApiResponse<String> clearContent(
+            @AuthenticationPrincipal UserSecurity userSecurity,
+            @RequestParam(name = "chapterId") String chapterId
+    ){
+        chapterService.clearChapterContent(chapterId);
+        return ApiResponse.success(null);
+    }
+
+    @GetMapping(path = "write-in-web")
+    public ApiResponse<String> writeInWeb(
+            @AuthenticationPrincipal UserSecurity userSecurity,
+            @RequestParam(name = "chapterId") String chapterId
+    ){
+        return ApiResponse.success(null);
+    }
+
 }

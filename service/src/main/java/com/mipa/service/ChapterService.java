@@ -55,7 +55,7 @@ public class ChapterService implements IChapterService {
                 chapter.setId(IdUtil.uuid());
 
                 var page = ChapterContentPage.builder().chapterId(chapter.getId()).id(IdUtil.uuid()).data("").build();
-                var chapterInfo = ChapterContentInfo.builder().pageIds(List.of(page.getId())).build();
+                var chapterInfo = ChapterContentInfo.builder().pageIds(List.of(page.getId())).pageWordCounts(List.of(0)).build();
                 chapter.setContentInfo(chapterInfo);
                 chapter.setIsPublish(false);
 
@@ -230,6 +230,28 @@ public class ChapterService implements IChapterService {
         }
     }
 
+    @Transactional
+    @Override
+    public void clearChapterContent(String chapterId) {
+        var chapterOpt = chapterMapper.selectById(chapterId, true);
+        if (chapterOpt.isPresent()) {
+            var chapter = chapterOpt.get();
+            var chapterContentInfo = chapter.getContentInfo();
+            if(!chapterContentInfo.getPageIds().isEmpty())
+                pageMapper.deleteBatch(chapterContentInfo.getPageIds());
+
+            var page = ChapterContentPage.builder().chapterId(chapter.getId()).id(IdUtil.uuid()).data("").build();
+            var chapterInfo = ChapterContentInfo.builder().pageIds(List.of(page.getId())).pageWordCounts(List.of(0)).build();
+            chapter.setContentInfo(chapterInfo);
+
+            pageMapper.insert(page);
+
+            chapterMapper.update(chapter);
+        } else {
+            throw BizException.badRequest(ExMsg.Or(ExMsg.CHAPTER_NOT_EXIST, ExMsg.NOT_AUTHOR));
+        }
+    }
+
     private ChapterInfoDTO getChapterInfo(String bookId, Integer chapterOrder, Boolean includeUnpublished) {
         var chapterInfoOpt = chapterMapper.selectByBookIdAndOrder(bookId, chapterOrder, includeUnpublished);
         if(chapterInfoOpt.isPresent()){
@@ -275,6 +297,8 @@ public class ChapterService implements IChapterService {
         }).toList();
         return infos;
     }
+
+
 
 
 

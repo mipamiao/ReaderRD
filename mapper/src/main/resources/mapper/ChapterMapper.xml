@@ -64,7 +64,7 @@
         UPDATE chapter
         SET book_id = #{bookId},
         name = #{name},
-        content = #{content},
+        content_info = #{contentInfo},
         chapter_order = #{chapterOrder}
         WHERE id = #{id}
     </update>
