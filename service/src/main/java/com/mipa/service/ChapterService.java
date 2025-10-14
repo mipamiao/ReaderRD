@@ -24,6 +24,7 @@ import com.mipa.utils.IdUtil;
 import com.mipa.validate.VerifyRelationShip;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -230,6 +231,9 @@ public class ChapterService implements IChapterService {
         }
     }
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     @Transactional
     @Override
     public void clearChapterContent(String chapterId) {
@@ -247,6 +251,7 @@ public class ChapterService implements IChapterService {
             pageMapper.insert(page);
 
             chapterMapper.update(chapter);
+            redisTemplate.getConnectionFactory().getConnection().flushDb();
         } else {
             throw BizException.badRequest(ExMsg.Or(ExMsg.CHAPTER_NOT_EXIST, ExMsg.NOT_AUTHOR));
         }

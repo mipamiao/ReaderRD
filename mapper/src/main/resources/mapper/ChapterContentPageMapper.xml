@@ -42,6 +42,15 @@
         WHERE id = #{id}
     </update>
 
+    <update id="updateBatch" parameterType="list">
+        <foreach collection="pages" item="page" separator=";">
+            UPDATE chapter_content_page
+            SET chapter_id = #{page.chapterId},
+            data = #{page.data}
+            WHERE id = #{page.id}
+        </foreach>
+    </update>
+
     <delete id="delete" parameterType="string">
         DELETE FROM chapter_content_page
         WHERE id = #{id}

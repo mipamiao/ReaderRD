@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 public interface ITopOfContentPageService {
 	@Transactional
-	ServerCommandSet scheduleOp(WriterCommandSet commands, String userId, String chapterId);
+	ServerCommandSet scheduleOp(WriterCommandSet commands, String userId, String chapterId, Boolean tryCache);
 
 	void getOp(String userId, Chapter chapter, WriterCommand command, ServerCommandSet serverCommands);
 

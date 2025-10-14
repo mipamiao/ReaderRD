@@ -81,7 +81,7 @@ class DataProcessor {
     let newEndDiff = currentContent.length - 1;
 
     while (oldEndDiff >= startDiff && newEndDiff >= startDiff &&
-           oldContent[oldEndDiff] === newContent[newEndDiff]) {
+           oldContent[oldEndDiff] === currentContent[newEndDiff]) {
       oldEndDiff--;
       newEndDiff--;
     }

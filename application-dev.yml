@@ -13,6 +13,14 @@ my-settings:
   content-page-size: 1024
   content-page-top-scale: 2.0
   content-page-bottom-scale: 0.5
+  content-page-cache-expire: 300
+  content-page-cache-data-max-size: 100
+  content-page-cache:
+    save-to-db-thread-num: 8
+    save-to-db-idle-time: 180
+  redis-lock:
+    watch-dog-thread-num: 8
+
 data:
   settings:
     data-net:

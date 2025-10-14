@@ -14,6 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WriterCommandSet {
+	String userId;
+	String chapterId;
 	List<WriterCommand> commands;
 	LocalDateTime timeStamp;
 }

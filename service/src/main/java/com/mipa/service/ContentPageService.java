@@ -9,29 +9,31 @@ import com.mipa.model.ChapterContentPage;
 import com.mipa.service.api.IContentPageService;
 import com.mipa.utils.IdUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 public class ContentPageService implements IContentPageService {
 
-	@Autowired
-	ChapterContentPageMapper pageMapper;
 
 	@Autowired
-	ChapterMapper chapterMapper;
+	private ChapterMapper chapterMapper;
 
 	@Autowired
-	MyConfiguration config;
+	private ContentPageCacheService contentPageCacheService;
+
 
 	@Transactional
 	public ServerCommandSet scheduleOp(WriterCommandSet commands, String userId, String chapterId) {
 		var serverCommands = ServerCommandSet.builder().commands(new ArrayList<ServerCommand>()).build();
-		var chapter = chapterMapper.selectById(chapterId, true).get();
+		var chapter = contentPageCacheService.getChapter(chapterId);
 		for (var command : commands.getCommands()) {
 			switch (command.getType()) {
 				case GetPageInfo -> {
@@ -63,7 +65,7 @@ public class ContentPageService implements IContentPageService {
 				}
 			}
 		}
-		chapterMapper.update(chapter);
+		contentPageCacheService.updateChapter(chapter);
 		return serverCommands;
 	}
 
@@ -78,6 +80,7 @@ public class ContentPageService implements IContentPageService {
 
 
 	public void insertOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
+
 		var page = new ChapterContentPage();
 		page.setData(command.getData());
 		page.setId(IdUtil.uuid());
@@ -105,8 +108,8 @@ public class ContentPageService implements IContentPageService {
 		page1.setData(newData);
 		deletePage(page2.getId());
 		updatePage(page1);
-		chapter.getContentInfo().getPageWordCounts().subList(command.getOtherPos(), command.getOtherPos()+1).clear();
-		chapter.getContentInfo().getPageIds().subList(command.getOtherPos(), command.getOtherPos()+1).clear();
+		chapter.getContentInfo().getPageWordCounts().remove(command.getOtherPos().intValue());
+		chapter.getContentInfo().getPageIds().remove(command.getOtherPos().intValue());
 		chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page1.getData().length());
 	}
 
@@ -126,9 +129,15 @@ public class ContentPageService implements IContentPageService {
 		if(command.getNum()!=-1)end = command.getOtherPos() + command.getNum();
 		else end = page.getData().length();
 		builder.delete(command.getOtherPos(), end);
-		page.setData(builder.toString());
-		chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page.getData().length());
-		updatePage(page);
+		if(builder.isEmpty()){
+			deletePage(page.getId());
+			chapter.getContentInfo().getPageIds().remove(command.getStartPos().intValue());
+			chapter.getContentInfo().getPageWordCounts().remove(command.getStartPos().intValue());
+		}else {
+			page.setData(builder.toString());
+			chapter.getContentInfo().getPageWordCounts().set(command.getStartPos(), page.getData().length());
+			updatePage(page);
+		}
 	}
 
 	public void updateReplaceOp(String userId, Chapter chapter , WriterCommand command, ServerCommandSet serverCommands){
@@ -145,25 +154,23 @@ public class ContentPageService implements IContentPageService {
 
 
 	private void insertPage(ChapterContentPage page){
-		pageMapper.insert(page);
+		contentPageCacheService.insertPage(page);
 	}
 
-	private void updatePage(ChapterContentPage page){
-		pageMapper.update(page);
+	private void updatePage(ChapterContentPage page) {
+		contentPageCacheService.updatePage(page);
 	}
 
-	private void deletePage(String pageId){
-		pageMapper.delete(pageId);
+	private void deletePage(String pageId) {
+		contentPageCacheService.deletePage(pageId);
 	}
 
-	private void deletePageBatch(List<String> pageIds){
-		for(var id : pageIds){
-			pageMapper.delete(id);
-		}
+	private void deletePageBatch(List<String> pageIds) {
+		contentPageCacheService.deletePageBatch(pageIds);
 	}
 
-	private ChapterContentPage getPage(String pageId){
-		return pageMapper.selectById(pageId).get();
+	public ChapterContentPage getPage(String pageId) {
+		return contentPageCacheService.getPage(pageId);
 	}
 
 }

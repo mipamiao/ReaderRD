@@ -50,6 +50,10 @@ public class ExMsg {
     public final static String CONTENT_PAGE_LACK = "内容页缺失";
     public final static String PARAM_ERROR_FOR_CONTENT = "用于内容同步的命令参数错误";
 
+    public final static String JSON_PARSE_FAILED_IN_REDIS = "在获取redis中存储的对象时json解析出错";
+
+    public final static String TASK_REJECT_LIMIT_SIZE = "任务被拒绝，因为超出上限";
+
 
     public static String And(String ...strs){
         var stringBuilder = new StringBuilder();

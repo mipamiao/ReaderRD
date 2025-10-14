@@ -8,14 +8,17 @@ import com.mipa.websocket.handler.WebSocketExceptionHandler;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+@Slf4j
 @Component
 @ServerEndpoint("/ws/writer/{userId}/{chapterId}")
 public class WriterWebSocket {
@@ -42,18 +45,18 @@ public class WriterWebSocket {
 
 	@OnMessage
 	public void onMessage(String message, @PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
-
-		executor.submit(() -> {
-			var session = userIdchapterId2SessionMap.get(userId + "_" + chapterId);
-			try {
-				var commands = JsonUtils.parseJson(message, WriterCommandSet.class);
-				var serverCommands = topOfPageService.scheduleOp(commands, userId, chapterId);
-				session.getBasicRemote().sendText(JsonUtils.toJson(serverCommands));
-			} catch (Exception e) {
-				WebSocketExceptionHandler.handle(session, e);
-			}
-		});
-
+		//System.out.println(LocalDateTime.now().toString() + "开始" +Thread.currentThread().getName());
+		var session = userIdchapterId2SessionMap.get(userId + "_" + chapterId);
+		try {
+			var commands = JsonUtils.parseJson(message, WriterCommandSet.class);
+			commands.setUserId(userId);
+			commands.setChapterId(chapterId);
+			var serverCommands = topOfPageService.scheduleOp(commands, userId, chapterId, true);
+			session.getBasicRemote().sendText(JsonUtils.toJson(serverCommands));
+			//System.out.println(LocalDateTime.now().toString() + "结束" +Thread.currentThread().getName());
+		} catch (Exception e) {
+			WebSocketExceptionHandler.handle(session, e);
+		}
 	}
 
 	@OnClose

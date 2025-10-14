@@ -42,11 +42,15 @@ public class TopOfContentPageService implements ITopOfContentPageService {
 	@Autowired
 	MyConfiguration config;
 
-	@Transactional
-	@Override
-	public ServerCommandSet scheduleOp(WriterCommandSet commands, String userId, String chapterId) {
+	@Autowired
+	ContentPageCacheService pageCacheService;
+
+	public ServerCommandSet scheduleOp(WriterCommandSet commands, String userId, String chapterId, Boolean tryCache) {
 		var serverCommands = ServerCommandSet.builder().commands(new ArrayList<ServerCommand>()).build();
-		var chapter = chapterMapper.selectById(chapterId, true).get();
+		if(tryCache)
+			pageCacheService.cacheOrExecute(commands, userId, chapterId);
+		if(commands.getCommands().isEmpty())return serverCommands;
+		var chapter = pageCacheService.getChapter(chapterId);
 		for (var command : commands.getCommands()) {
 			switch (command.getType()) {
 				case GetPageInfo -> {
@@ -79,12 +83,7 @@ public class TopOfContentPageService implements ITopOfContentPageService {
 
 	@Override
 	public void getOp(String userId, Chapter chapter, WriterCommand command, ServerCommandSet serverCommands) {
-//		var pageCodeAndStartPos_start = getPageCodeAndStartPos(command.getOtherPos(), chapter.getContentInfo());
-//		var pageCodeAndStartPos_end = getPageCodeAndStartPos(command.getOtherPos(), chapter.getContentInfo());
-
-
 		pageService.getOp(userId, chapter, command, serverCommands);
-
 	}
 
 	@Override
@@ -97,9 +96,9 @@ public class TopOfContentPageService implements ITopOfContentPageService {
 	private WriterCommandSet updateAddOp(String userId, Chapter chapter, WriterCommand command, ServerCommandSet serverCommands) {
 		var pageCodeAndStartPos = getPageCodeAndStartPos(command.getOtherPos(), chapter.getContentInfo());
 
-		var page = getPage(chapter.getContentInfo().getPageIds().get(pageCodeAndStartPos.getPageCode()));
+		var page = pageService.getPage(chapter.getContentInfo().getPageIds().get(pageCodeAndStartPos.getPageCode()));
 		WriterCommandSet commands = WriterCommandSet.builder().commands(new ArrayList<WriterCommand>()).build();
-		StringBuilder builder = new StringBuilder(page.getData()==null?"":page.getData());
+		StringBuilder builder = new StringBuilder(page.getData());
 		builder.insert(pageCodeAndStartPos.getStartPos(), command.getData());
 		if (builder.length() > config.contentPageTopScale * config.contentPageSize) {
 			var datas = StringUtils.splitBySize(builder.toString(), config.contentPageSize);
@@ -181,11 +180,6 @@ public class TopOfContentPageService implements ITopOfContentPageService {
 		return commands;
 	}
 
-
-	private ChapterContentPage getPage(String pageId){
-		return pageMapper.selectById(pageId).get();
-	}
-
 	private PageCodeAndStartPos getPageCodeAndStartPos(Integer startPos, ChapterContentInfo contentInfo){
 		var pageWordCounts = contentInfo.getPageWordCounts();
 		Integer curTotal = 0;
@@ -203,27 +197,9 @@ public class TopOfContentPageService implements ITopOfContentPageService {
 		var pageWordCounts = contentInfo.getPageWordCounts();
 		List<PageCodeAndStartPos> resultPair = new ArrayList<>();
 		Integer curTotal = 0;
-//		int start = 0;
-//		for (start = 0; start < pageWordCounts.size(); start++) {
-//			if (startPos == 0 || (curTotal < startPos && curTotal + pageWordCounts.get(start) >= startPos)) {
-//				resultPair.add(PageCodeAndStartPos.builder().pageCode(start).startPos(startPos - curTotal).build());
-//				startPos += num;
-//				break;
-//			}
-//			curTotal += pageWordCounts.get(start);
-//		}
-//		startPos += num;
-//		int end = start;
-//		for(end = start; end < pageWordCounts.size(); end ++){
-//			if (curTotal < startPos && curTotal + pageWordCounts.get(end) >= startPos){
-//				resultPair.add(PageCodeAndStartPos.builder().pageCode(end).startPos(startPos - curTotal).build());
-//				return resultPair;
-//			}
-//			curTotal += pageWordCounts.get(end);
-//		}
+
 		for (int i = 0; i < pageWordCounts.size(); i++) {
 			if (startPos == 0 || (curTotal < startPos && curTotal + pageWordCounts.get(i) >= startPos)) {
-				PagePosKind kind;
 				resultPair.add(PageCodeAndStartPos.builder().pageCode(i).startPos(startPos - curTotal)
 						.pageWordCount(pageWordCounts.get(i)).build());
 				startPos += num;

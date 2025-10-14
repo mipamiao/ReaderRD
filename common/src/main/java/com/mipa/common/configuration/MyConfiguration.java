@@ -35,4 +35,16 @@ public class MyConfiguration {
 
     @Value("${my-settings.content-page-bottom-scale}")
     public Double contentPageBottomScale;
+
+    @Value("${my-settings.content-page-cache-expire}")
+    public Integer contentPageCacheExpireTime;
+
+    @Value("${my-settings.content-page-cache-data-max-size}")
+    public Integer contentPageCacheDataMaxSize;
+
+
+    @Value("${my-settings.content-page-cache.save-to-db-idle-time}")
+    public Integer contentPageCacheSaveToDBIdleTime;
+
+
 }

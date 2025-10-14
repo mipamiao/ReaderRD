@@ -3,6 +3,10 @@ class WebSocketManager {
     this.socket = null;
     this.isConnected = false;
     this.reconnectTimeout = null;
+    this.onOpenCallback = null;
+    this.onMessageCallback = null;
+    this.onErrorCallback = null;
+    this.onCloseCallback = null;
   }
 
   connect(url, onOpenCallback, onMessageCallback, onErrorCallback, onCloseCallback) {
@@ -10,28 +14,34 @@ class WebSocketManager {
       return;
     }
 
+    // 保存回调函数以便重连时使用
+    this.onOpenCallback = onOpenCallback;
+    this.onMessageCallback = onMessageCallback;
+    this.onErrorCallback = onErrorCallback;
+    this.onCloseCallback = onCloseCallback;
+
     this.socket = new WebSocket(url);
 
     this.socket.onopen = () => {
       console.log('✅ WebSocket 已连接');
       this.isConnected = true;
-      if (onOpenCallback) onOpenCallback();
+      if (this.onOpenCallback) this.onOpenCallback();
     };
 
     this.socket.onmessage = (event) => {
-      if (onMessageCallback) onMessageCallback(event);
+      if (this.onMessageCallback) this.onMessageCallback(event);
     };
 
     this.socket.onerror = (error) => {
       console.error('❌ WebSocket 发生错误:', error);
       this.isConnected = false;
-      if (onErrorCallback) onErrorCallback(error);
+      if (this.onErrorCallback) this.onErrorCallback(error);
     };
 
     this.socket.onclose = () => {
       console.log('🔌 WebSocket 连接已关闭');
       this.isConnected = false;
-      if (onCloseCallback) onCloseCallback();
+      if (this.onCloseCallback) this.onCloseCallback();
     };
   }
 
@@ -66,10 +76,11 @@ class WebSocketManager {
     if (this.reconnectTimeout) {
       clearTimeout(this.reconnectTimeout);
     }
-    
+
     this.reconnectTimeout = setTimeout(() => {
       console.log('⏳ 尝试重新连接...');
-      this.connect(url);
+      // 使用保存的回调函数进行重连
+      this.connect(url, this.onOpenCallback, this.onMessageCallback, this.onErrorCallback, this.onCloseCallback);
       if (onReconnectCallback) onReconnectCallback();
     }, delay);
   }
