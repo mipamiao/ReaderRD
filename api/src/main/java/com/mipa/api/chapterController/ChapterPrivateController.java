@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 
 import java.util.List;
 
@@ -134,11 +135,14 @@ public class ChapterPrivateController {
     }
 
     @GetMapping(path = "write-in-web")
-    public ApiResponse<String> writeInWeb(
+    public ModelAndView writeInWeb(
             @AuthenticationPrincipal UserSecurity userSecurity,
             @RequestParam(name = "chapterId") String chapterId
     ){
-        return ApiResponse.success(null);
+        ModelAndView mv = new ModelAndView();
+        mv.setViewName("writerPage"); // 对应 templates/hello.html
+        mv.addObject("msg", "Hello from ModelAndView");
+        return mv;
     }
 
 }

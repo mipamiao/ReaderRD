@@ -16,6 +16,9 @@ public class ThreadPoolConfig {
 	@Value("${my-settings.redis-lock.watch-dog-thread-num}")
 	public Integer redisLockWatchDogThreadNum;
 
+	@Value("${my-settings.websocket.writer-page.keep-alive-thread-num}")
+	public Integer websocketWriterPageKeepAliveThreadNum ;
+
 	@Bean
 	public ScheduledThreadPoolWithMaxSize contentPageCacheSaveToDBThreadPool(){
 		return new ScheduledThreadPoolWithMaxSize(contentPageCacheSaveToDBThreadNum,
@@ -26,5 +29,11 @@ public class ThreadPoolConfig {
 	public ScheduledThreadPoolWithMaxSize redisWatchDogThreadPool(){
 		return new ScheduledThreadPoolWithMaxSize(redisLockWatchDogThreadNum,
 				"ContentPageCacheSaveToDBService", 1000);
+	}
+
+	@Bean
+	public ScheduledThreadPoolWithMaxSize writerPageKeepAliveThreadPool(){
+		return new ScheduledThreadPoolWithMaxSize(websocketWriterPageKeepAliveThreadNum,
+				"writerWebSocket", 1000);
 	}
 }

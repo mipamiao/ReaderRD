@@ -18,7 +18,9 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
-    com.mipa.service: DEBUG
+    com.mipa:
+      service: DEBUG
+      websocket: DEBUG
 
 
 pagehelper:

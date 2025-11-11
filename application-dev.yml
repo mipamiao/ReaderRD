@@ -20,6 +20,10 @@ my-settings:
     save-to-db-idle-time: 180
   redis-lock:
     watch-dog-thread-num: 8
+  websocket:
+    writer-page:
+      keep-alive-thread-num: 8
+      heart-beat-span: 30
 
 data:
   settings:

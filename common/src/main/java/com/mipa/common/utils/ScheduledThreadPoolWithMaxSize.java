@@ -17,12 +17,15 @@ public class ScheduledThreadPoolWithMaxSize {
 
 	private Integer threadNum;
 
+	private String poolName;
+
 	private final ConcurrentHashMap<String, ScheduledFuture<?>> taskNameMap = new ConcurrentHashMap<String, ScheduledFuture<?>>();
 
 	public ScheduledThreadPoolWithMaxSize(Integer threadNum, String poolName, Integer maxSize){
 		this.threadNum = threadNum;
 		scheduler = Executors.newScheduledThreadPool(threadNum);
 		size = new AtomicInteger(maxSize);
+		this.poolName = poolName;
 	}
 
 	public void scheduleAtFixedRate(String name, Runnable command, long initialDelay, long period, TimeUnit unit) {
@@ -61,6 +64,10 @@ public class ScheduledThreadPoolWithMaxSize {
 
 	public Integer getThreadNum() {
 		return threadNum;
+	}
+
+	public String getPoolName(){
+		return poolName;
 	}
 
 	private boolean tryDec() {

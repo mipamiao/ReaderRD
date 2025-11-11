@@ -46,5 +46,9 @@ public class MyConfiguration {
     @Value("${my-settings.content-page-cache.save-to-db-idle-time}")
     public Integer contentPageCacheSaveToDBIdleTime;
 
+    @Value("${my-settings.websocket.writer-page.keep-alive-thread-num}")
+    public Integer writerPageKeepAliveThreadNum;
 
+    @Value("${my-settings.websocket.writer-page.heart-beat-span}")
+    public Integer writerPageHeartBeatSpan;
 }
