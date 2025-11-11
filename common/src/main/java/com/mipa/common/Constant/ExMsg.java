@@ -45,6 +45,16 @@ public class ExMsg {
     public final static String PAGE_CACHE_PARAM_MISMATCH = "分页缓存参数缺失或出错";
     public final static String PAGE_CACHE_PARAM_CONFLICT = "分页缓存参数错位，保证第idIndex个参数为 id";
 
+    public final static String JSON_PARSE_FAILED = "json解析出错";
+    public final static String JSON_TRANS_FAILED = "json生成出错";
+    public final static String CONTENT_PAGE_LACK = "内容页缺失";
+    public final static String PARAM_ERROR_FOR_CONTENT = "用于内容同步的命令参数错误";
+
+    public final static String JSON_PARSE_FAILED_IN_REDIS = "在获取redis中存储的对象时json解析出错";
+
+    public final static String TASK_REJECT_LIMIT_SIZE = "任务被拒绝，因为超出上限";
+
+
     public static String And(String ...strs){
         var stringBuilder = new StringBuilder();
         for(String str: strs){

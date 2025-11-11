@@ -18,16 +18,14 @@ logging:
           descriptor:
             sql:
               BasicBinder: TRACE
+    com.mipa:
+      service: DEBUG
+      websocket: DEBUG
 
-    com:
-      mipa:
-        ReaderRD:
-          Security:
-            JwtAuthenticationFilter: DEBUG
 
 pagehelper:
   helper-dialect: mysql
-  reasonable: false       # 页码 < 1 自动设置为 1，页码超过总页数自动设置为最后一页
+  reasonable: false
   support-methods-arguments: true
   params: count=countSql
 
@@ -35,16 +33,4 @@ mybatis:
   mapper-locations: classpath*:mapper/*.xml
 
 
-my-settings:
-  file-separator: "/"
-  secret: "mipa-secret:mipamipamiaowakuwakupikaqiu"
-data:
-  settings:
-    data-net:
-      host: "http://10.12.57.22:8080"
-    avatars:
-      srcDir: "/statics/avatars"
-      dstDir: "D:/mipa/files/avatars"
-    book-cover-img:
-      srcDir: "/statics/bookCoverImgs"
-      dstDir: "D:/mipa/files/bookCoverImgs"
+

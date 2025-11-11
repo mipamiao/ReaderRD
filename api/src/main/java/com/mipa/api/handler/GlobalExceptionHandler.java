@@ -26,8 +26,8 @@ public class GlobalExceptionHandler {
     }
 
 
-//    @ExceptionHandler(Exception.class)
-//    public ApiResponse<?> handleException(Exception ex) {
-//        return ApiResponse.empty(500, ex.getMessage());
-//    }
+    @ExceptionHandler(Exception.class)
+    public ApiResponse<?> handleException(Exception ex) {
+        return ApiResponse.empty(500, ex.getMessage());
+    }
 }

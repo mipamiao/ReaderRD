@@ -4,9 +4,11 @@ import com.mipa.common.Enum.VerifyResult;
 import com.mipa.common.utils.TypeSafeMap;
 import com.mipa.mapper.*;
 import com.mipa.model.*;
+import org.springframework.stereotype.Component;
 
 import java.util.Objects;
 
+@Component
 public class VerifyRelationShip {
 
     private TypeSafeMap TSM;
@@ -23,7 +25,7 @@ public class VerifyRelationShip {
 
     public VerifyRelationShip verifyBookAndChapter(String bookId, String chapterId, ChapterMapper mapper) {
         if (!isSucceed()) return failed();
-        var chapterOpt = mapper.selectById(chapterId);
+        var chapterOpt = mapper.selectById(chapterId, true);
         if (chapterOpt.isEmpty()) {
             result = VerifyResult.Failed;
             return this;
@@ -53,12 +55,33 @@ public class VerifyRelationShip {
         return this;
     }
 
+    /**
+     * 验证chapterId章节的作者是authorid
+     *
+     * @param authorId
+     * @param chapterId
+     * @param chapterMapper
+     * @param bookMapper
+     * @return
+     */
+    public VerifyRelationShip verifyAuthorAndChapter(String authorId, String chapterId, ChapterMapper chapterMapper, BookMapper bookMapper) {
+        if (!isSucceed()) return failed();
+        var chapterOpt = chapterMapper.selectById(chapterId, true);
+        if (chapterOpt.isEmpty()) {
+            result = VerifyResult.Failed;
+            return this;
+        }
+        var chapter = chapterOpt.get();
+        TSM.put(Chapter.class, chapter);
+        return verifyAuthorAndBook(authorId, chapter.getBookId(), bookMapper);
+    }
+
     public VerifyRelationShip verifyChapterIdAndOrder(Integer chapterOrder, String chapterId, ChapterMapper mapper) {
         if (!isSucceed()) return failed();
         var chapter = TSM.get(Chapter.class);
         if (chapter != null && Objects.equals(chapter.getChapterOrder(), chapterOrder)) return this;
 
-        var chapterOpt = mapper.selectById(chapterId);
+        var chapterOpt = mapper.selectById(chapterId, true);
         if (chapterOpt.isEmpty()) {
             result = VerifyResult.Failed;
             return this;
@@ -141,6 +164,14 @@ public class VerifyRelationShip {
         return failed();
     }
 
+    public VerifyRelationShip verifyContentPageExist(String pageId, ChapterContentPageMapper mapper) {
+        if (!isSucceed()) return failed();
+        var pageOpt = mapper.selectById(pageId);
+        if (pageOpt.isEmpty()) return failed();
+        TSM.put(ChapterContentPage.class, pageOpt.get());
+        return success();
+    }
+
     public boolean isSucceed(){
         return result == VerifyResult.Success;
     }
@@ -159,4 +190,5 @@ public class VerifyRelationShip {
     public <T> T get(Class<T> type) {
         return TSM.get(type);
     }
+
 }

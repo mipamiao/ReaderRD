@@ -1,0 +1,103 @@
+package com.mipa.websocket;
+
+import com.mipa.common.configuration.MyConfiguration;
+import com.mipa.common.dto.writerwsdto.WriterCommandSet;
+import com.mipa.common.utils.JsonUtils;
+import com.mipa.common.utils.ScheduledThreadPoolWithMaxSize;
+import com.mipa.service.api.ITopOfContentPageService;
+import com.mipa.websocket.handler.WebSocketExceptionHandler;
+import jakarta.annotation.Resource;
+import jakarta.websocket.*;
+import jakarta.websocket.server.PathParam;
+import jakarta.websocket.server.ServerEndpoint;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+
+@Slf4j
+@Component
+@ServerEndpoint("/ws/writer/{userId}/{chapterId}")
+public class WriterWebSocket {
+
+	private static final ExecutorService executor = Executors.newFixedThreadPool(10);
+
+	static ITopOfContentPageService topOfPageService;
+
+	static MyConfiguration config;
+
+	@Resource(name = "writerPageKeepAliveThreadPool")
+	private ScheduledThreadPoolWithMaxSize pool;
+
+	@Autowired
+	public void setPageService(ITopOfContentPageService topOfPageService, MyConfiguration config) {
+		WriterWebSocket.topOfPageService = topOfPageService;
+		WriterWebSocket.config = config;
+	}
+
+
+	private static  final Map<String, String> id2UserIdMap = new ConcurrentHashMap<>();
+	private static final Map<String, Session> userIdchapterId2SessionMap = new ConcurrentHashMap<>();
+
+	@OnOpen
+	public void onOpen(Session session, @PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
+
+		System.out.println("连接成功：" + session.getId());
+		userIdchapterId2SessionMap.put(userId + "_" + chapterId, session);
+	}
+
+	@OnMessage
+	public void onMessage(String message, @PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
+		//System.out.println(LocalDateTime.now().toString() + "开始" +Thread.currentThread().getName());
+		var session = userIdchapterId2SessionMap.get(userId + "_" + chapterId);
+		try {
+			var commands = JsonUtils.parseJson(message, WriterCommandSet.class);
+			commands.setUserId(userId);
+			commands.setChapterId(chapterId);
+			var serverCommands = topOfPageService.scheduleOp(commands, userId, chapterId, true);
+			session.getBasicRemote().sendText(JsonUtils.toJson(serverCommands));
+			//System.out.println(LocalDateTime.now().toString() + "结束" +Thread.currentThread().getName());
+		} catch (Exception e) {
+			WebSocketExceptionHandler.handle(session, e);
+		}//VLA，聚生智能，大小脑协同，大模型，
+	}
+
+	@OnClose
+	public void onClose(@PathParam("userId") String userId, @PathParam("chapterId") String chapterId) {
+		System.out.println("连接关闭");
+		userIdchapterId2SessionMap.remove(userId + "_" + chapterId);
+	}
+
+	@OnError
+	public void onError(Session session, Throwable error) {
+		WebSocketExceptionHandler.handle(session, error);
+	}
+
+
+	public void keepAlive() {
+		var sessions = userIdchapterId2SessionMap.values().stream().toList();
+		for (int threadIdx = 0; threadIdx < pool.getThreadNum(); threadIdx++) {
+			int finalThreadIdx = threadIdx;
+			pool.scheduleOneShot(pool.getPoolName() + threadIdx, new Runnable() {
+				@Override
+				public void run() {
+					try {
+						for (int i = finalThreadIdx; i < sessions.size(); i += pool.getThreadNum()) {
+							sessions.get(i).getBasicRemote().sendPing(ByteBuffer.wrap("ping".getBytes()));
+						}
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+			}, 0, TimeUnit.SECONDS);
+		}
+	}
+
+}

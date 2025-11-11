@@ -20,21 +20,20 @@ public class ChapterPublicController {
     private IChapterService chapterService;
 
     @GetMapping(path = "get")
-    public ApiResponse<ChapterInfoAndContentDTO> getChapter(
-            @RequestParam(name = "bookId") String bookId,
+    public ApiResponse<ChapterInfoDTO> getChapter(
             @RequestParam(name = "chapterId") String chapterId
     ) {
-        var result = chapterService.getChapterInfoAndContent(bookId, chapterId);
+        var result = chapterService.getPublishedChapterInfo(chapterId);
         if (result != null) return ApiResponse.success(result);
         return ApiResponse.unauthorized(null);
     }
 
     @GetMapping(path = "get-by-order")
-    public ApiResponse<ChapterInfoAndContentDTO> getChapterByOrder(
+    public ApiResponse<ChapterInfoDTO> getChapterByOrder(
             @RequestParam(name = "bookId") String bookId,
             @RequestParam(name = "chapterOrder") Integer order
     ) {
-        var result = chapterService.getChapterInfoAndContent(bookId, order);
+        var result = chapterService.getPublishedChapterInfo(bookId, order);
         if (result != null) return ApiResponse.success(result);
         return ApiResponse.unauthorized(null);
     }
@@ -46,7 +45,7 @@ public class ChapterPublicController {
             @RequestParam(defaultValue = "0", name = "pageNumber") Integer pageNumber,
             @RequestParam(defaultValue = "10", name = "pageSize") Integer pageSize
     ) {
-        var page = chapterService.listChapters(bookId, pageNumber,pageSize);
+        var page = chapterService.listPublishedChapters(bookId, pageNumber,pageSize);
         ChapterInfoListDTO dto = new ChapterInfoListDTO();
         dto.setChapters(page.getDatas());
         dto.setTotal(page.getTotal());
@@ -59,17 +58,16 @@ public class ChapterPublicController {
     public ApiResponse<List<ChapterInfoDTO>> listChapters(
             @RequestParam(name = "bookId") String bookId
     ) {
-        var result = chapterService.listAllChapters(bookId);
+        var result = chapterService.listAllPublishedChapters(bookId);
         if (result != null) return ApiResponse.success(result);
         return ApiResponse.unauthorized(null);
     }
 
     @GetMapping(path = "info")
     public ApiResponse<ChapterInfoDTO> getChapterInfo(
-            @RequestParam(name = "bookId") String bookId,
             @RequestParam(name = "chapterId") String chapterId
     ) {
-        var result = chapterService.getChapterInfo(bookId, chapterId);
+        var result = chapterService.getPublishedChapterInfo(chapterId);
         if (result != null) return ApiResponse.success(result);
         return ApiResponse.unauthorized(null);
     }

@@ -6,3 +6,33 @@ spring:
       password: "mipa"  # 没密码可不写
       database: 0
       timeout: 3000
+
+my-settings:
+  file-separator: "/"
+  secret: "mipa-secret:mipamipamiaowakuwakupikaqiu"
+  content-page-size: 1024
+  content-page-top-scale: 2.0
+  content-page-bottom-scale: 0.5
+  content-page-cache-expire: 300
+  content-page-cache-data-max-size: 100
+  content-page-cache:
+    save-to-db-thread-num: 8
+    save-to-db-idle-time: 180
+  redis-lock:
+    watch-dog-thread-num: 8
+  websocket:
+    writer-page:
+      keep-alive-thread-num: 8
+      heart-beat-span: 30
+
+data:
+  settings:
+    data-net:
+      host: "http://10.12.57.22:8080"
+    avatars:
+      srcDir: "/statics/avatars"
+      dstDir: "D:/mipa/files/avatars"
+    book-cover-img:
+      srcDir: "/statics/bookCoverImgs"
+      dstDir: "D:/mipa/files/bookCoverImgs"
+

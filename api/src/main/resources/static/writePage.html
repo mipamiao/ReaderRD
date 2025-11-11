@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <title>WebSocket 文本编辑器</title>
+    <style>
+        body {
+          font-family: Arial, sans-serif;
+          padding: 20px;
+          background: #f5f5f5;
+        }
+        #status {
+          margin-bottom: 10px;
+          font-size: 14px;
+          color: #555;
+        }
+        textarea {
+          width: 100%;
+          height: 300px;
+          padding: 10px;
+          font-size: 16px;
+          line-height: 1.5;
+          box-sizing: border-box;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+          resize: vertical;
+        }
+        button {
+          margin-top: 15px;
+          padding: 8px 15px;
+          font-size: 14px;
+          cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<h1>📡 WebSocket 文本编辑器</h1>
+<div id="status">正在连接中...</div>
+<textarea id="editor" placeholder="等待后端返回数据..." disabled></textarea>
+<button id="refreshBtn">重新获取内容</button>
+
+<script>
+    const userId = '0051e957c8cd41f4a4379793aecc5219';       // TODO: 改成你的 userId
+    const chapterId = '8987404f7a764731926b26b728aa7139';    // TODO: 改成你的 chapterId
+    const wsUrl = `ws://localhost:8080/ws/writer/${userId}/${chapterId}`;
+
+    const statusEl = document.getElementById('status');
+    const editorEl = document.getElementById('editor');
+    const refreshBtn = document.getElementById('refreshBtn');
+
+    let socket;
+    let lastContent = ''; // 用于存储上一次的内容
+
+    function connectWebSocket() {
+      socket = new WebSocket(wsUrl);
+
+      socket.onopen = () => {
+        statusEl.textContent = '✅ WebSocket 已连接';
+        editorEl.disabled = false;
+
+        // 发送请求：WriterCommand
+        const msg = {
+          type: "GetPage",
+          startPos: 0,
+          otherPos: 0,
+          num: 0,
+          data: ""
+        };
+        const msgforsend = {
+            commands : [msg],
+            timeStamp : new Date().toISOString()
+        }
+        socket.send(JSON.stringify(msgforsend));
+      };
+
+      socket.onmessage = (event) => {
+        console.log("📩 收到后端消息:", event.data);
+        try {
+          // 先解析整个JSON字符串
+          const serverData = JSON.parse(event.data);
+
+          // 根据后端类定义，应该是ServerCommandSet对象，包含commands数组
+          if (serverData && serverData.commands && serverData.commands.length > 0) {
+            // 获取第一个command
+            const firstCommand = serverData.commands[0];
+            console.log("📩 收到后端消息:",firstCommand);
+            // 如果第一个command有data字段，则显示在编辑框中
+            if (firstCommand && firstCommand.data !== undefined) {
+                console.log("📩 收到后端消息:",firstCommand.data);
+              editorEl.value = firstCommand.data;
+              lastContent = firstCommand.data; // 更新最后内容
+            }
+          }
+        } catch (e) {
+          console.error("解析后端 JSON 出错:", e);
+        }
+      };
+
+      socket.onerror = (error) => {
+        console.error("❌ WebSocket 发生错误:", error);
+        statusEl.textContent = '❌ 连接出错';
+      };
+
+      socket.onclose = () => {
+        statusEl.textContent = '🔌 连接已关闭，3 秒后重连...';
+        editorEl.disabled = true;
+        setTimeout(connectWebSocket, 3000);
+      };
+    }
+
+    // 点击“重新获取内容”按钮
+    refreshBtn.addEventListener('click', () => {
+      if (socket && socket.readyState === WebSocket.OPEN) {
+        const msg = {
+          type: "GetPage",
+          startPos: 0,
+          otherPos: 0,
+          num: 0,
+          data: ""
+        };
+        socket.send(JSON.stringify(msg));
+      }
+    });
+
+    // 监听文本变化
+    editorEl.addEventListener('input', function() {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      const currentContent = editorEl.value;
+
+      // 计算变更
+      detectChanges(lastContent, currentContent);
+
+      // 更新最后内容
+      lastContent = currentContent;
+    });
+
+    // 检测内容变化并发送相应的WebSocket消息
+    function detectChanges(oldContent, newContent) {
+      // 从前往后找到第一个不同的位置
+      let startDiff = 0;
+      while (startDiff < oldContent.length && startDiff < newContent.length &&
+             oldContent[startDiff] === newContent[startDiff]) {
+        startDiff++;
+      }
+
+      // 从后往前找到第一个不同的位置
+      let oldEndDiff = oldContent.length - 1;
+      let newEndDiff = newContent.length - 1;
+
+      while (oldEndDiff >= startDiff && newEndDiff >= startDiff &&
+             oldContent[oldEndDiff] === newContent[newEndDiff]) {
+        oldEndDiff--;
+        newEndDiff--;
+      }
+
+      // 判断操作类型
+      // 插入操作：旧文本的两个位置碰到一起，新文本的两个位置没有碰到一起
+      if (oldEndDiff < startDiff && newEndDiff >= startDiff) {
+        const insertPos = startDiff;
+        const insertText = newContent.substring(startDiff, newEndDiff + 1);
+        sendUpdateMessage('UpdatePage_Add', insertPos, 0, insertText);
+      }
+      // 删除操作：旧文本的两个位置没有碰到一起，新文本的两个位置碰到了一起
+      else if (oldEndDiff >= startDiff && newEndDiff < startDiff) {
+        const deletePos = startDiff;
+        const deleteLen = oldEndDiff - startDiff + 1;
+        sendUpdateMessage('UpdatePage_Remove', deletePos, deleteLen, '');
+      }
+      // 替换操作：新旧文本都未能碰到一起
+      else if (oldEndDiff >= startDiff && newEndDiff >= startDiff) {
+        const replacePos = startDiff;
+        const replaceLen = oldEndDiff - startDiff + 1;
+        const newText = newContent.substring(startDiff, newEndDiff + 1);
+        sendUpdateMessage('UpdatePage_Replace', replacePos, replaceLen, newText);
+      }
+      // 内容相同的情况无需处理
+    }
+
+    // 发送更新消息
+    function sendUpdateMessage(type, startPos, num, data) {
+      if (!socket || socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      const msg = {
+        type: type,
+        startPos: 0,
+        otherPos: startPos, // 根据需要设置
+        num: num,
+        data: data
+      };
+
+      const msgforsend = {
+        commands: [msg],
+        timeStamp: new Date().toISOString()
+      };
+
+      console.log("📤 发送消息:", JSON.stringify(msgforsend));
+      socket.send(JSON.stringify(msgforsend));
+    }
+
+    // 页面加载时自动连接
+    connectWebSocket();
+</script>
+
+</body>
+</html>

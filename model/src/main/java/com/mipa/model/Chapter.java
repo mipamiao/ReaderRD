@@ -1,6 +1,7 @@
 package com.mipa.model;
 
 
+import com.mipa.common.utils.ChapterContentInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,9 @@ public class Chapter {
     private String id;
     private String bookId;
     private String name;
-    private String content;
+    private ChapterContentInfo contentInfo;
     private Integer chapterOrder;
+    private Boolean isPublish;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
